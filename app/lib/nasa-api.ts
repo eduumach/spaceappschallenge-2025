@@ -152,8 +152,7 @@ export class NASATemporalService {
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'SpaceAppsChallenge2025/1.0'
+          'Accept': 'application/json'
         }
       })
 
