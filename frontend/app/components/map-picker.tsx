@@ -15,6 +15,7 @@ export function MapPicker({ onLocationSelect, initialPosition = [-15.7801, -47.9
     import("./map-picker.client").then((mod) => {
       setMapComponent(() => mod.MapPickerClient);
     });
+    
   }, []);
 
   if (!MapComponent) {
