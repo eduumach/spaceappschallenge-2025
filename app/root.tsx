@@ -8,6 +8,7 @@ import {
 } from "react-router";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -55,6 +56,7 @@ export default function App() {
       <ThemeProvider defaultTheme="system" storageKey="theme">
         <Outlet />
       </ThemeProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }
