@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { MapPin, Navigation, Search, Trash2, Loader2 } from "lucide-react";
+import { NASADataQueryModal } from "~/components/nasa-data-query-modal";
+import { MapPin, Navigation, Search, Trash2, Loader2, Database, Satellite, Calendar } from "lucide-react";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -128,8 +129,45 @@ export default function Home() {
 
             <Card className="border-2 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Informações</CardTitle>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Período de Consulta
+                </CardTitle>
               </CardHeader>
+              <CardContent className="space-y-4">
+                {selectedLocation ? (
+                  <>
+                    <div className="space-y-3">
+                      <NASADataQueryModal 
+                        latitude={selectedLocation.lat} 
+                        longitude={selectedLocation.lng}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <Navigation className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Clique no mapa para selecionar uma localização
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Você poderá consultar dados da NASA após selecionar um ponto
+                    </p>
+                  </div>
+                )}
+                
+                {selectedLocation && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearSelection}
+                    className="w-full"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Limpar Seleção
+                  </Button>
+                )}
+              </CardContent>
             </Card>
           </div>
         </div>
