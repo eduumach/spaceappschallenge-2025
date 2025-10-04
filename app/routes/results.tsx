@@ -1,6 +1,7 @@
 // Página de resultados de análise climática - criada pelo Claude Sonnet 4.5
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Link, useSearchParams } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
@@ -147,24 +148,11 @@ export default function Results() {
   const perfilKey = searchParams.get('perfil') || 'praia';
   const locationName = searchParams.get('name') || '';
 
-  const [loading, setLoading] = useState(true);
-  const [resultado, setResultado] = useState<DayAnalysis[]>([]);
-  const [melhorDia, setMelhorDia] = useState<DayAnalysis | null>(null);
-  const [erro, setErro] = useState(false);
-
   const perfil = perfisEventos[perfilKey];
 
-  useEffect(() => {
-    if (latitude && longitude && dataInicio && dataFim) {
-      buscarDadosHistoricos();
-    }
-  }, [latitude, longitude, dataInicio, dataFim]);
-
-  const buscarDadosHistoricos = async () => {
-    setLoading(true);
-    setErro(false);
-
-    try {
+  const { data: resultado, isLoading: loading, isError: erro, refetch } = useQuery({
+    queryKey: ['nasa-historical-data', latitude, longitude, dataInicio, dataFim, perfilKey],
+    queryFn: async () => {
       // Gerar lista de dias no range
       const inicio = new Date(dataInicio);
       const fim = new Date(dataFim);
@@ -257,26 +245,22 @@ export default function Results() {
       });
 
       if (analisesPorDia.length === 0) {
-        setErro(true);
-        setLoading(false);
-        return;
+        throw new Error('Nenhum dado disponível para análise');
       }
 
-      setResultado(analisesPorDia);
+      return analisesPorDia;
+    },
+    enabled: !!(latitude && longitude && dataInicio && dataFim),
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    retry: 1
+  });
 
-      // Determinar o melhor dia
-      const melhor = analisesPorDia.reduce((prev, current) =>
-        current.probabilidade > prev.probabilidade ? current : prev
-      );
-      setMelhorDia(melhor);
-
-    } catch (error) {
-      console.error('Erro ao buscar dados:', error);
-      setErro(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const melhorDia = useMemo(() => {
+    if (!resultado || resultado.length === 0) return null;
+    return resultado.reduce((prev, current) =>
+      current.probabilidade > prev.probabilidade ? current : prev
+    );
+  }, [resultado]);
 
   const analisarDados = (dados: WeatherData[], data: Date): DayAnalysis => {
     const criterios = perfil.criterios;
@@ -472,7 +456,7 @@ export default function Results() {
                 <p className="text-muted-foreground">
                   Não foi possível obter os dados climáticos da NASA. Por favor, tente novamente.
                 </p>
-                <Button onClick={buscarDadosHistoricos}>
+                <Button onClick={() => refetch()}>
                   Tentar Novamente
                 </Button>
               </div>
@@ -511,7 +495,7 @@ export default function Results() {
         )}
 
         {/* Comparação de Dias */}
-        {resultado.length > 0 && !loading && (
+        {resultado && resultado.length > 0 && !loading && (
           <Card className="border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">

@@ -1,6 +1,7 @@
 // Página criada pelo Claude Sonnet 4.5
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
 import { MapPicker } from "~/components/map-picker";
 import { MobileNavigation } from "~/components/mobile-navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -22,10 +23,41 @@ export default function Home() {
   const navigate = useNavigate();
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationName, setLocationName] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
   const [searchMode, setSearchMode] = useState<'map' | 'name' | 'coordinates'>('map');
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+
+  const searchLocationMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(name)}&limit=1`
+      );
+
+      if (!response.ok) {
+        throw new Error('Erro na busca');
+      }
+
+      const data = await response.json();
+
+      if (!data || data.length === 0) {
+        throw new Error('Localização não encontrada');
+      }
+
+      const result = data[0];
+      return {
+        lat: parseFloat(result.lat),
+        lng: parseFloat(result.lon)
+      };
+    },
+    onSuccess: (data) => {
+      setSelectedLocation(data);
+    },
+    onError: (error: Error) => {
+      alert(error.message === 'Localização não encontrada'
+        ? 'Localização não encontrada. Tente com um nome mais específico.'
+        : 'Erro ao buscar localização. Tente novamente.');
+    }
+  });
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setSelectedLocation({ lat, lng });
@@ -38,37 +70,9 @@ export default function Home() {
     setLongitude("");
   };
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (!locationName.trim()) return;
-    
-    setIsSearching(true);
-    
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)}&limit=1`
-      );
-      
-      if (!response.ok) {
-        throw new Error('Erro na busca');
-      }
-      
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        const result = data[0];
-        const lat = parseFloat(result.lat);
-        const lng = parseFloat(result.lon);
-        
-        setSelectedLocation({ lat, lng });
-      } else {
-        alert('Localização não encontrada. Tente com um nome mais específico.');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar localização:', error);
-      alert('Erro ao buscar localização. Tente novamente.');
-    } finally {
-      setIsSearching(false);
-    }
+    searchLocationMutation.mutate(locationName);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -235,18 +239,18 @@ export default function Home() {
                     onKeyPress={handleKeyPress}
                     className="border-2 text-base sm:text-lg p-3 sm:p-4"
                   />
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     size="lg"
                     onClick={handleSearch}
-                    disabled={isSearching || !locationName.trim()}
+                    disabled={searchLocationMutation.isPending || !locationName.trim()}
                   >
-                    {isSearching ? (
+                    {searchLocationMutation.isPending ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
                       <Search className="h-4 w-4 mr-2" />
                     )}
-                    {isSearching ? "Buscando..." : "Buscar Localização"}
+                    {searchLocationMutation.isPending ? "Buscando..." : "Buscar Localização"}
                   </Button>
                   {selectedLocation && (
                     <>

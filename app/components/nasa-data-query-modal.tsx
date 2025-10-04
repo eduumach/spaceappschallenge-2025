@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import { Calendar, Download, Loader2, MapPin, AlertCircle, Database, Satellite } from "lucide-react"
+import { useMutation } from "@tanstack/react-query"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
 import {
@@ -12,7 +13,7 @@ import {
 } from "~/components/ui/dialog"
 import { Badge } from "~/components/ui/badge"
 import { DateRangePicker, type DateRange } from "~/components/ui/date-range-picker"
-import { NASATemporalService, AVAILABLE_PARAMETERS, type NASATemporalResponse } from "~/lib/nasa-api"
+import { AVAILABLE_PARAMETERS, type NASATemporalResponse } from "~/lib/nasa-api"
 
 interface NASADataQueryModalProps {
   latitude: number
@@ -25,50 +26,121 @@ interface FormattedDataEntry {
   parameters: Record<string, number>
 }
 
+// Helper function to format date for NASA API
+function formatDateForAPI(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}${month}${day}`
+}
+
+// Helper function to format data for display
+function formatDataForDisplay(data: NASATemporalResponse): FormattedDataEntry[] {
+  const formattedData: FormattedDataEntry[] = []
+  const parameters = data.properties.parameter
+
+  Object.keys(parameters).forEach(paramKey => {
+    const paramData = parameters[paramKey]
+
+    if (typeof paramData === 'object') {
+      Object.keys(paramData).forEach(timestamp => {
+        const value = paramData[timestamp]
+
+        const year = timestamp.substring(0, 4)
+        const month = timestamp.substring(4, 6)
+        const day = timestamp.substring(6, 8)
+        const hour = timestamp.substring(8, 10)
+
+        const dateStr = `${year}-${month}-${day}`
+        const hourStr = `${hour}:00`
+
+        let entry = formattedData.find(item =>
+          item.date === dateStr && item.hour === hourStr
+        )
+
+        if (!entry) {
+          entry = {
+            date: dateStr,
+            hour: hourStr,
+            parameters: {}
+          }
+          formattedData.push(entry)
+        }
+
+        entry.parameters[paramKey] = value
+      })
+    }
+  })
+
+  return formattedData.sort((a, b) => {
+    const dateTimeA = new Date(`${a.date} ${a.hour}`)
+    const dateTimeB = new Date(`${b.date} ${b.hour}`)
+    return dateTimeA.getTime() - dateTimeB.getTime()
+  })
+}
+
 export function NASADataQueryModal({ latitude, longitude }: NASADataQueryModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
-  const [isLoading, setIsLoading] = useState(false)
   const [data, setData] = useState<FormattedDataEntry[] | null>(null)
   const [rawData, setRawData] = useState<NASATemporalResponse | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const selectedParameters = [
     'PRECTOTCORR', 'WS10M', 'T2MDEW', 'RH2M', 'T2M'
   ]
 
-  const handleQuery = async () => {
-    if (!dateRange?.from || !dateRange?.to) {
-      setError('Selecione um período válido')
-      return
-    }
+  const nasaDataMutation = useMutation({
+    mutationFn: async ({ from, to }: { from: Date; to: Date }) => {
+      const startDate = formatDateForAPI(from)
+      const endDate = formatDateForAPI(to)
 
-    setIsLoading(true)
-    setError(null)
-    setData(null)
+      const url = new URL('https://power.larc.nasa.gov/api/temporal/hourly/point')
+      url.searchParams.set('latitude', latitude.toString())
+      url.searchParams.set('longitude', longitude.toString())
+      url.searchParams.set('start', startDate)
+      url.searchParams.set('end', endDate)
+      url.searchParams.set('parameters', selectedParameters.join(','))
+      url.searchParams.set('community', 'AG')
+      url.searchParams.set('format', 'JSON')
+      url.searchParams.set('header', 'true')
+      url.searchParams.set('time-standard', 'LST')
 
-    try {
-      const response = await NASATemporalService.fetchDataForDateRange(
-        latitude,
-        longitude,
-        dateRange.from,
-        dateRange.to,
-        selectedParameters
-      )
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
 
+      if (!response.ok) {
+        if (response.status === 400) {
+          const errorData = await response.json()
+          throw new Error(errorData.messages?.[0]?.text || 'Parâmetros inválidos')
+        } else if (response.status === 429) {
+          throw new Error('Muitas requisições. Tente novamente em alguns segundos.')
+        } else if (response.status >= 500) {
+          throw new Error('Erro interno do servidor da NASA. Tente novamente mais tarde.')
+        } else {
+          throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`)
+        }
+      }
+
+      const data: NASATemporalResponse = await response.json()
+      return data
+    },
+    onSuccess: (response) => {
       setRawData(response)
-      const formattedData = NASATemporalService.formatDataForDisplay(response)
+      const formattedData = formatDataForDisplay(response)
       setData(formattedData)
-      
-      // Abrir modal automaticamente quando os dados chegarem
+
       if (formattedData.length > 0) {
         setIsOpen(true)
       }
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao consultar dados da NASA')
-    } finally {
-      setIsLoading(false)
     }
+  })
+
+  const handleQuery = () => {
+    if (!dateRange?.from || !dateRange?.to) return
+    nasaDataMutation.mutate({ from: dateRange.from, to: dateRange.to })
   }
 
 
@@ -149,11 +221,11 @@ export function NASADataQueryModal({ latitude, longitude }: NASADataQueryModalPr
       {/* Botão de consulta */}
       <Button
         onClick={handleQuery}
-        disabled={isLoading || !dateRange?.from || !dateRange?.to}
+        disabled={nasaDataMutation.isPending || !dateRange?.from || !dateRange?.to}
         className="w-full"
         size="sm"
       >
-        {isLoading ? (
+        {nasaDataMutation.isPending ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Consultando...
@@ -167,10 +239,10 @@ export function NASADataQueryModal({ latitude, longitude }: NASADataQueryModalPr
       </Button>
 
       {/* Exibição de erro */}
-      {error && (
+      {nasaDataMutation.isError && (
         <div className="text-xs text-destructive flex items-center gap-1">
           <AlertCircle className="h-3 w-3" />
-          <span>{error}</span>
+          <span>{nasaDataMutation.error instanceof Error ? nasaDataMutation.error.message : 'Erro ao consultar dados da NASA'}</span>
         </div>
       )}
 
