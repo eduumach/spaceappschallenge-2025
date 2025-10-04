@@ -4,9 +4,14 @@ import { Link, useSearchParams, useNavigate } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Calendar as CalendarComponent } from "~/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { ArrowLeft, MapPin, Calendar, ArrowRight, Cloud } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "~/lib/utils";
 import type { Route } from "./+types/analysis";
+import type { DateRange } from "react-day-picker";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -68,8 +73,7 @@ export default function Analysis() {
   const locationName = searchParams.get('name') || '';
   const searchMode = searchParams.get('mode') || 'map';
 
-  const [dia, setDia] = useState('');
-  const [mes, setMes] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [perfilSelecionado, setPerfilSelecionado] = useState('praia');
 
   if (!latitude || !longitude) {
@@ -92,16 +96,16 @@ export default function Analysis() {
   }
 
   const handleContinueToResults = () => {
-    if (!dia || !mes) {
-      alert('Por favor, selecione o dia e o mês do evento');
+    if (!dateRange?.from || !dateRange?.to) {
+      alert('Por favor, selecione um período de datas para análise');
       return;
     }
 
     const params = new URLSearchParams({
       lat: latitude.toString(),
       lng: longitude.toString(),
-      dia,
-      mes,
+      dataInicio: dateRange.from.toISOString(),
+      dataFim: dateRange.to.toISOString(),
       perfil: perfilSelecionado,
       mode: searchMode,
     });
@@ -203,52 +207,55 @@ export default function Analysis() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Calendar className="h-5 w-5 text-green-600" />
-              Data do Evento
+              Período do Evento
             </CardTitle>
             <CardDescription>
-              Selecione o dia e mês para análise de dados históricos
+              Selecione um intervalo de datas para análise de dados históricos
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="dia" className="text-base">Dia</Label>
-                <Select value={dia} onValueChange={setDia}>
-                  <SelectTrigger id="dia" className="text-base">
-                    <SelectValue placeholder="Selecione o dia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                      <SelectItem key={d} value={d.toString()}>
-                        {d}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="mes" className="text-base">Mês</Label>
-                <Select value={mes} onValueChange={setMes}>
-                  <SelectTrigger id="mes" className="text-base">
-                    <SelectValue placeholder="Selecione o mês" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Janeiro</SelectItem>
-                    <SelectItem value="2">Fevereiro</SelectItem>
-                    <SelectItem value="3">Março</SelectItem>
-                    <SelectItem value="4">Abril</SelectItem>
-                    <SelectItem value="5">Maio</SelectItem>
-                    <SelectItem value="6">Junho</SelectItem>
-                    <SelectItem value="7">Julho</SelectItem>
-                    <SelectItem value="8">Agosto</SelectItem>
-                    <SelectItem value="9">Setembro</SelectItem>
-                    <SelectItem value="10">Outubro</SelectItem>
-                    <SelectItem value="11">Novembro</SelectItem>
-                    <SelectItem value="12">Dezembro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label className="text-base">Selecione o período</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal text-base h-auto py-3",
+                      !dateRange && "text-muted-foreground"
+                    )}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {dateRange?.from ? (
+                      dateRange.to ? (
+                        <>
+                          {format(dateRange.from, "dd 'de' MMMM", { locale: ptBR })} -{" "}
+                          {format(dateRange.to, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        </>
+                      ) : (
+                        format(dateRange.from, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                      )
+                    ) : (
+                      <span>Selecione um período</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                    locale={ptBR}
+                    disabled={(date) => date < new Date("1900-01-01")}
+                  />
+                </PopoverContent>
+              </Popover>
+              {dateRange?.from && dateRange?.to && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Período selecionado: {format(dateRange.from, "dd/MM/yyyy")} até {format(dateRange.to, "dd/MM/yyyy")}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -259,7 +266,7 @@ export default function Analysis() {
             onClick={handleContinueToResults}
             size="lg"
             className="w-full sm:w-auto"
-            disabled={!dia || !mes}
+            disabled={!dateRange?.from || !dateRange?.to}
           >
             <ArrowRight className="h-5 w-5 mr-2" />
             Ver Probabilidades
