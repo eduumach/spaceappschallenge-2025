@@ -2,10 +2,8 @@
 bun = "latest"
 
 [tasks.dev]
-dir = "frontend"
 run = "bun run dev"
 
 
 [tasks.shadcn]
-dir = "frontend"
 run = "bunx --bun shadcn@latest"
