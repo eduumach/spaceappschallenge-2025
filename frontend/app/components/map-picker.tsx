@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 interface MapPickerProps {
   onLocationSelect: (lat: number, lng: number) => void;
   initialPosition?: [number, number];
+  searchLocation?: { lat: number; lng: number } | null;
 }
 
-export function MapPicker({ onLocationSelect, initialPosition = [-15.7801, -47.9292] }: MapPickerProps) {
+export function MapPicker({ onLocationSelect, initialPosition = [-15.7801, -47.9292], searchLocation }: MapPickerProps) {
   const [MapComponent, setMapComponent] = useState<React.ComponentType<MapPickerProps> | null>(null);
 
   useEffect(() => {
@@ -24,5 +25,5 @@ export function MapPicker({ onLocationSelect, initialPosition = [-15.7801, -47.9
     );
   }
 
-  return <MapComponent onLocationSelect={onLocationSelect} initialPosition={initialPosition} />;
+  return <MapComponent onLocationSelect={onLocationSelect} initialPosition={initialPosition} searchLocation={searchLocation} />;
 }

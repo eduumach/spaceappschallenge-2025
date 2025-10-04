@@ -1,6 +1,6 @@
 // Componente client-only criado pelo Claude Sonnet 4.5
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -17,12 +17,26 @@ if (typeof window !== "undefined") {
 interface MapPickerProps {
   onLocationSelect: (lat: number, lng: number) => void;
   initialPosition?: [number, number];
+  searchLocation?: { lat: number; lng: number } | null;
 }
 
-function LocationMarker({ onLocationSelect }: { onLocationSelect: (lat: number, lng: number) => void }) {
+function LocationMarker({ onLocationSelect, searchLocation }: { 
+  onLocationSelect: (lat: number, lng: number) => void;
+  searchLocation?: { lat: number; lng: number } | null;
+}) {
   const [position, setPosition] = useState<[number, number] | null>(null);
+  const map = useMap();
 
-  const map = useMapEvents({
+  // Atualiza a posição quando uma busca é realizada
+  useEffect(() => {
+    if (searchLocation) {
+      const newPosition: [number, number] = [searchLocation.lat, searchLocation.lng];
+      setPosition(newPosition);
+      map.flyTo(newPosition, 10); // Zoom mais próximo para localização buscada
+    }
+  }, [searchLocation, map]);
+
+  useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
       setPosition([lat, lng]);
@@ -34,7 +48,7 @@ function LocationMarker({ onLocationSelect }: { onLocationSelect: (lat: number, 
   return position === null ? null : <Marker position={position} />;
 }
 
-export function MapPickerClient({ onLocationSelect, initialPosition = [-15.7801, -47.9292] }: MapPickerProps) {
+export function MapPickerClient({ onLocationSelect, initialPosition = [-15.7801, -47.9292], searchLocation }: MapPickerProps) {
   return (
     <MapContainer
       center={initialPosition}
@@ -46,7 +60,7 @@ export function MapPickerClient({ onLocationSelect, initialPosition = [-15.7801,
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <LocationMarker onLocationSelect={onLocationSelect} />
+      <LocationMarker onLocationSelect={onLocationSelect} searchLocation={searchLocation} />
     </MapContainer>
   );
 }
