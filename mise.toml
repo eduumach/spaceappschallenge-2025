@@ -1,2 +1,6 @@
 [tools]
 bun = "latest"
+
+[tasks.dev]
+dir = "frontend"
+run = "bun run dev"
