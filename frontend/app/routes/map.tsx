@@ -72,7 +72,7 @@ export default function MapPage() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 overflow-hidden border-2">
-            <CardHeader className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b">
+            <CardHeader className="border-b">
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-blue-600" />
                 Mapa Interativo
