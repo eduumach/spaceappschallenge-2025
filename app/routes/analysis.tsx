@@ -1,10 +1,11 @@
-// Página de análise de dados NASA
+// Página de análise de dados NASA - modificada pelo Claude Sonnet 4.5
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams, useNavigate } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { NASADataQueryModal } from "~/components/nasa-data-query-modal";
-import { ArrowLeft, MapPin, Calendar, Satellite } from "lucide-react";
+import { Label } from "~/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { ArrowLeft, MapPin, Calendar, ArrowRight, Cloud } from "lucide-react";
 import type { Route } from "./+types/analysis";
 
 export function meta({}: Route.MetaArgs) {
@@ -14,13 +15,62 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+interface PerfilEvento {
+  nome: string;
+  emoji: string;
+  descricao: string;
+}
+
+const perfisEventos: Record<string, PerfilEvento> = {
+  praia: {
+    nome: 'Dia de Praia',
+    emoji: '🏖️',
+    descricao: 'Dia ensolarado, quente, sem chuva e vento moderado'
+  },
+  churrasco: {
+    nome: 'Churrasco ao Ar Livre',
+    emoji: '🍖',
+    descricao: 'Sem chuva, temperatura agradável'
+  },
+  casamento: {
+    nome: 'Casamento ao Ar Livre',
+    emoji: '💒',
+    descricao: 'Clima perfeito, sem chuva, vento leve'
+  },
+  trilha: {
+    nome: 'Trilha/Caminhada',
+    emoji: '🥾',
+    descricao: 'Temperatura amena, pode ter chuva leve'
+  },
+  corrida: {
+    nome: 'Corrida/Maratona',
+    emoji: '🏃',
+    descricao: 'Clima fresco, sem chuva'
+  },
+  cena_chuva: {
+    nome: 'Cena de Filme com Chuva',
+    emoji: '🎬',
+    descricao: 'Precisa de chuva para a cena!'
+  },
+  observacao_estrelas: {
+    nome: 'Observação de Estrelas',
+    emoji: '🌟',
+    descricao: 'Céu limpo, sem chuva, baixa umidade'
+  }
+};
+
 export default function Analysis() {
   const [searchParams] = useSearchParams();
-  
+  const navigate = useNavigate();
+
   const latitude = parseFloat(searchParams.get('lat') || '0');
   const longitude = parseFloat(searchParams.get('lng') || '0');
   const locationName = searchParams.get('name') || '';
   const searchMode = searchParams.get('mode') || 'map';
+
+  const [dia, setDia] = useState('');
+  const [mes, setMes] = useState('');
+  const [perfilSelecionado, setPerfilSelecionado] = useState('praia');
 
   if (!latitude || !longitude) {
     return (
@@ -41,9 +91,31 @@ export default function Analysis() {
     );
   }
 
+  const handleContinueToResults = () => {
+    if (!dia || !mes) {
+      alert('Por favor, selecione o dia e o mês do evento');
+      return;
+    }
+
+    const params = new URLSearchParams({
+      lat: latitude.toString(),
+      lng: longitude.toString(),
+      dia,
+      mes,
+      perfil: perfilSelecionado,
+      mode: searchMode,
+    });
+
+    if (locationName) {
+      params.append('name', locationName);
+    }
+
+    navigate(`/results?${params.toString()}`);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-3 sm:p-6">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Link to="/">
@@ -53,11 +125,11 @@ export default function Analysis() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              Análise de Dados NASA
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              Vai Chover na Minha Parada?
             </h1>
-            <p className="text-muted-foreground">
-              Dados coletados para a localização selecionada
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Configure seu evento e veja as probabilidades climáticas
             </p>
           </div>
         </div>
@@ -65,87 +137,133 @@ export default function Analysis() {
         {/* Location Info */}
         <Card className="border-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <MapPin className="h-5 w-5 text-blue-600" />
               Localização Selecionada
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Método de Seleção</p>
-                <p className="font-medium">
-                  {searchMode === 'map' ? 'Mapa Interativo' : 
-                   searchMode === 'name' ? 'Busca por Nome' : 
-                   'Coordenadas Diretas'}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Latitude</p>
-                <p className="font-mono">{latitude.toFixed(6)}</p>
+                <p className="font-mono text-sm sm:text-base">{latitude.toFixed(6)}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Longitude</p>
-                <p className="font-mono">{longitude.toFixed(6)}</p>
+                <p className="font-mono text-sm sm:text-base">{longitude.toFixed(6)}</p>
               </div>
               {locationName && (
-                <div className="space-y-1 md:col-span-3">
-                  <p className="text-sm font-medium text-muted-foreground">Nome da Localização</p>
-                  <p className="font-medium">{locationName}</p>
+                <div className="space-y-1 sm:col-span-1">
+                  <p className="text-sm font-medium text-muted-foreground">Local</p>
+                  <p className="font-medium text-sm sm:text-base truncate">{locationName}</p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* NASA Data Query */}
+        {/* Event Type Selection */}
         <Card className="border-2 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Satellite className="h-5 w-5 text-blue-600" />
-              Consulta de Dados NASA
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Cloud className="h-5 w-5 text-blue-600" />
+              Tipo de Evento
             </CardTitle>
             <CardDescription>
-              Selecione um período para consultar dados científicos da NASA para esta localização
+              Selecione o tipo de evento para análise personalizada
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <NASADataQueryModal 
-              latitude={latitude} 
-              longitude={longitude}
-            />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {Object.entries(perfisEventos).map(([key, perfil]) => (
+                <button
+                  key={key}
+                  onClick={() => setPerfilSelecionado(key)}
+                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    perfilSelecionado === key
+                      ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/50 shadow-md'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{perfil.emoji}</div>
+                  <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                    {perfil.nome}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    {perfil.descricao}
+                  </div>
+                </button>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Additional Analysis Section */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="border-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-green-600" />
-                Análise Temporal
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Aqui você poderá visualizar dados históricos e tendências para esta localização.
-              </p>
-            </CardContent>
-          </Card>
+        {/* Date Selection */}
+        <Card className="border-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Calendar className="h-5 w-5 text-green-600" />
+              Data do Evento
+            </CardTitle>
+            <CardDescription>
+              Selecione o dia e mês para análise de dados históricos
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="dia" className="text-base">Dia</Label>
+                <Select value={dia} onValueChange={setDia}>
+                  <SelectTrigger id="dia" className="text-base">
+                    <SelectValue placeholder="Selecione o dia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                      <SelectItem key={d} value={d.toString()}>
+                        {d}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <Card className="border-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Satellite className="h-5 w-5 text-purple-600" />
-                Dados Satelitais
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Visualize imagens de satélite e dados de sensoriamento remoto para a região.
-              </p>
-            </CardContent>
-          </Card>
+              <div className="space-y-2">
+                <Label htmlFor="mes" className="text-base">Mês</Label>
+                <Select value={mes} onValueChange={setMes}>
+                  <SelectTrigger id="mes" className="text-base">
+                    <SelectValue placeholder="Selecione o mês" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Janeiro</SelectItem>
+                    <SelectItem value="2">Fevereiro</SelectItem>
+                    <SelectItem value="3">Março</SelectItem>
+                    <SelectItem value="4">Abril</SelectItem>
+                    <SelectItem value="5">Maio</SelectItem>
+                    <SelectItem value="6">Junho</SelectItem>
+                    <SelectItem value="7">Julho</SelectItem>
+                    <SelectItem value="8">Agosto</SelectItem>
+                    <SelectItem value="9">Setembro</SelectItem>
+                    <SelectItem value="10">Outubro</SelectItem>
+                    <SelectItem value="11">Novembro</SelectItem>
+                    <SelectItem value="12">Dezembro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Continue Button */}
+        <div className="flex justify-end pt-4">
+          <Button
+            onClick={handleContinueToResults}
+            size="lg"
+            className="w-full sm:w-auto"
+            disabled={!dia || !mes}
+          >
+            <ArrowRight className="h-5 w-5 mr-2" />
+            Ver Probabilidades
+          </Button>
         </div>
       </div>
     </div>
