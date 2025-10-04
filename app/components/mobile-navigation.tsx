@@ -48,7 +48,7 @@ export function MobileNavigation({ searchMode, onSearchModeChange }: MobileNavig
           className="w-full flex items-center justify-between p-4 h-auto border-2"
         >
           <div className="flex items-center space-x-3">
-            {currentMode && <currentMode.icon className="h-5 w-5 text-blue-600" />}
+            {currentMode && <currentMode.icon className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />}
             <div className="text-left">
               <div className="font-semibold">{currentMode?.title}</div>
               <div className="text-sm text-muted-foreground">{currentMode?.description}</div>

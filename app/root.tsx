@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { ThemeProvider } from "./components/theme-provider";
+import { Header } from "./components/header";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/moon-cheese.png", type: "image/png" },
@@ -48,7 +49,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="theme">
-      <Outlet />
+      <Header />
+      <main className="min-h-screen">
+        <Outlet />
+      </main>
     </ThemeProvider>
   )
 }

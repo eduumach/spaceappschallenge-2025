@@ -2,13 +2,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { MapPicker } from "~/components/map-picker";
-import { MobileNavigation } from "~/components/mobile-navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "~/components/ui/navigation-menu";
-import { MapPin, Navigation, Search, Trash2, Loader2, Database, Satellite, Calendar, Globe, MapIcon, ArrowRight } from "lucide-react";
+
+import { MapPin, Navigation, Search, Trash2, Loader2, Database, Satellite, Calendar, Globe, MapIcon, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -23,12 +22,17 @@ export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationName, setLocationName] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [searchMode, setSearchMode] = useState<'map' | 'name' | 'coordinates'>('map');
+  const [activeMethod, setActiveMethod] = useState<'map' | 'name' | 'coordinates'>('map');
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [isModalExpanded, setIsModalExpanded] = useState(true);
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setSelectedLocation({ lat, lng });
+    // Atualiza os campos de coordenadas quando uma localização é selecionada
+    setLatitude(lat.toString());
+    setLongitude(lng.toString());
+    setActiveMethod('map');
   };
 
   const handleClearSelection = () => {
@@ -60,6 +64,10 @@ export default function Home() {
         const lng = parseFloat(result.lon);
         
         setSelectedLocation({ lat, lng });
+        // Atualiza os campos de coordenadas
+        setLatitude(lat.toString());
+        setLongitude(lng.toString());
+        setActiveMethod('name');
       } else {
         alert('Localização não encontrada. Tente com um nome mais específico.');
       }
@@ -97,6 +105,7 @@ export default function Home() {
     }
     
     setSelectedLocation({ lat, lng });
+    setActiveMethod('coordinates');
   };
 
   const handleCoordinateKeyPress = (e: React.KeyboardEvent) => {
@@ -111,10 +120,10 @@ export default function Home() {
     const params = new URLSearchParams({
       lat: selectedLocation.lat.toString(),
       lng: selectedLocation.lng.toString(),
-      mode: searchMode,
+      mode: activeMethod,
     });
     
-    if (locationName && searchMode === 'name') {
+    if (locationName && activeMethod === 'name') {
       params.append('name', locationName);
     }
     
@@ -122,250 +131,185 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-3 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10">
         <div className="text-center space-y-4">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-neutral-700 to-neutral-500 dark:from-neutral-300 dark:to-neutral-100 bg-clip-text text-transparent">
             Seleção de Localização
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground px-4">Escolha como deseja selecionar um ponto de interesse</p>
+          <p className="text-sm sm:text-base text-muted-foreground px-4">Use todos os métodos para selecionar um ponto de interesse</p>
+        </div>
+
+        <div className="space-y-6">
           
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <NavigationMenu className="mx-auto">
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger
-                    className={`${searchMode === 'map' ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
-                    onClick={() => setSearchMode('map')}
-                  >
-                    <MapIcon className="h-4 w-4 mr-2" />
-                    Mapa Interativo
-                  </NavigationMenuTrigger>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger
-                    className={`${searchMode === 'name' ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
-                    onClick={() => setSearchMode('name')}
-                  >
+          <Card className="overflow-hidden border-2 shadow-lg">
+            <CardHeader className="border-b p-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Search className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+                Busca por Nome
+                {activeMethod === 'name' && <Badge variant="default" className="ml-2">Ativo</Badge>}
+              </CardTitle>
+              <CardDescription className="text-sm">Digite o nome de uma cidade ou endereço</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                <Input
+                  placeholder="Digite um endereço ou local..."
+                  value={locationName}
+                  onChange={(e) => setLocationName(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="border-2"
+                />
+                <Button 
+                  className="w-full" 
+                  onClick={handleSearch}
+                  disabled={isSearching || !locationName.trim()}
+                >
+                  {isSearching ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
                     <Search className="h-4 w-4 mr-2" />
-                    Por Nome
-                  </NavigationMenuTrigger>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger
-                    className={`${searchMode === 'coordinates' ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
-                    onClick={() => setSearchMode('coordinates')}
-                  >
-                    <Globe className="h-4 w-4 mr-2" />
-                    Coordenadas
-                  </NavigationMenuTrigger>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-          </div>
+                  )}
+                  {isSearching ? "Buscando..." : "Buscar"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Mobile Navigation */}
-          <div className="md:hidden px-4">
-            <MobileNavigation 
-              searchMode={searchMode} 
-              onSearchModeChange={setSearchMode}
-            />
-          </div>
+          <Card className="overflow-hidden border-2 shadow-lg">
+            <CardHeader className="border-b p-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Globe className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+                Coordenadas
+                {activeMethod === 'coordinates' && <Badge variant="default" className="ml-2">Ativo</Badge>}
+              </CardTitle>
+              <CardDescription className="text-sm">Insira latitude e longitude diretamente</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Latitude</label>
+                    <Input
+                      placeholder="-23.5505"
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      onKeyPress={handleCoordinateKeyPress}
+                      className="border-2"
+                      type="number"
+                      step="any"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Entre -90 e 90</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Longitude</label>
+                    <Input
+                      placeholder="-46.6333"
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      onKeyPress={handleCoordinateKeyPress}
+                      className="border-2"
+                      type="number"
+                      step="any"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Entre -180 e 180</p>
+                  </div>
+                </div>
+                <Button 
+                  className="w-full"
+                  onClick={handleCoordinateSearch}
+                  disabled={!latitude.trim() || !longitude.trim()}
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Definir
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden border-2 shadow-lg">
+            <CardHeader className="border-b p-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <MapPin className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+                Mapa Interativo
+                {activeMethod === 'map' && <Badge variant="default" className="ml-2">Ativo</Badge>}
+              </CardTitle>
+              <CardDescription className="text-sm">Clique no mapa para selecionar</CardDescription>
+            </CardHeader>
+            <CardContent className="px-4 py-0">
+              <div className="h-[400px] sm:h-[500px] lg:h-[600px]">
+                <MapPicker onLocationSelect={handleLocationSelect} searchLocation={selectedLocation} />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="flex justify-center px-4">
-          {searchMode === 'map' && (
-            <Card className="w-full max-w-4xl overflow-hidden border-2">
-              <CardHeader className="border-b p-4 sm:p-6">
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <MapPin className="h-5 w-5 text-blue-600" />
-                  Mapa Interativo
-                </CardTitle>
-                <CardDescription className="text-sm">Clique em qualquer local para selecionar as coordenadas</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="h-[300px] sm:h-[450px] lg:h-[600px]">
-                  <MapPicker onLocationSelect={handleLocationSelect} searchLocation={selectedLocation} />
-                </div>
-                {selectedLocation && (
-                  <div className="p-3 sm:p-4 border-t bg-gray-50 dark:bg-gray-900/50">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Button
-                        onClick={handleContinueToAnalysis}
-                        className="flex-1 w-full"
-                        size="lg"
-                      >
-                        <ArrowRight className="h-4 w-4 mr-2" />
-                        Continuar para Análise
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={handleClearSelection}
-                        size="lg"
-                        className="sm:w-auto"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2 sm:mr-0" />
-                        <span className="sm:hidden">Limpar</span>
-                      </Button>
-                    </div>
-                  </div>
+        {selectedLocation && (
+          <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] shadow-xl z-50 flex transition-all duration-300 ${
+            isModalExpanded ? 'w-80 bg-background border-l' : 'w-12 bg-transparent'
+          }`}>
+            <div className="flex flex-col justify-start pt-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsModalExpanded(!isModalExpanded)}
+                className={`h-12 w-12 rounded-l-lg rounded-r-none border border-r-0 hover:bg-neutral-100 dark:hover:bg-neutral-800 shadow-md bg-neutral-200 dark:bg-neutral-700 ${
+                  isModalExpanded ? '-ml-10' : 'ml-0'
+                }`}
+              >
+                {isModalExpanded ? (
+                  <ChevronRight className="h-4 w-4 text-neutral-700 dark:text-neutral-300" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4 text-neutral-700 dark:text-neutral-300" />
                 )}
-              </CardContent>
-            </Card>
-          )}
+              </Button>
+            </div>
 
-          {searchMode === 'name' && (
-            <Card className="w-full max-w-2xl overflow-hidden border-2">
-              <CardHeader className="border-b p-4 sm:p-6">
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <Search className="h-5 w-5 text-blue-600" />
-                  Busca por Nome
-                </CardTitle>
-                <CardDescription className="text-sm">Digite o nome de uma cidade ou endereço para localizar</CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 lg:p-8">
-                <div className="space-y-4">
-                  <Input
-                    placeholder="Digite um endereço ou local..."
-                    value={locationName}
-                    onChange={(e) => setLocationName(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="border-2 text-base sm:text-lg p-3 sm:p-4"
-                  />
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    onClick={handleSearch}
-                    disabled={isSearching || !locationName.trim()}
-                  >
-                    {isSearching ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Search className="h-4 w-4 mr-2" />
-                    )}
-                    {isSearching ? "Buscando..." : "Buscar Localização"}
-                  </Button>
-                  {selectedLocation && (
-                    <>
-                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border">
-                        <h3 className="font-semibold text-green-800 dark:text-green-200 text-sm sm:text-base">Localização Encontrada:</h3>
-                        <p className="text-green-700 dark:text-green-300 text-xs sm:text-sm break-all">
-                          Lat: {selectedLocation.lat.toFixed(6)}, Lng: {selectedLocation.lng.toFixed(6)}
-                        </p>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <Button
-                          onClick={handleContinueToAnalysis}
-                          className="flex-1 w-full"
-                          size="lg"
-                        >
-                          <ArrowRight className="h-4 w-4 mr-2" />
-                          Continuar para Análise
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={handleClearSelection}
-                          size="lg"
-                          className="sm:w-auto"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2 sm:mr-0" />
-                          <span className="sm:hidden">Limpar</span>
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {searchMode === 'coordinates' && (
-            <Card className="w-full max-w-2xl overflow-hidden border-2">
-              <CardHeader className="border-b p-4 sm:p-6">
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <Globe className="h-5 w-5 text-blue-600" />
-                  Busca por Coordenadas
-                </CardTitle>
-                <CardDescription className="text-sm">Insira as coordenadas de latitude e longitude diretamente</CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 lg:p-8">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Latitude</label>
-                      <Input
-                        placeholder="-23.5505"
-                        value={latitude}
-                        onChange={(e) => setLatitude(e.target.value)}
-                        onKeyPress={handleCoordinateKeyPress}
-                        className="border-2"
-                        type="number"
-                        step="any"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Entre -90 e 90</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Longitude</label>
-                      <Input
-                        placeholder="-46.6333"
-                        value={longitude}
-                        onChange={(e) => setLongitude(e.target.value)}
-                        onKeyPress={handleCoordinateKeyPress}
-                        className="border-2"
-                        type="number"
-                        step="any"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Entre -180 e 180</p>
-                    </div>
+            {isModalExpanded && (
+              <div className="flex-1 flex flex-col">
+                <div className="p-6 border-b">
+                  <h2 className="text-lg font-semibold text-center">
+                    Localização Selecionada
+                  </h2>
+                  <div className="flex justify-center mt-2">
+                    <Badge variant="secondary">
+                      {activeMethod === 'map' ? 'Mapa' : activeMethod === 'name' ? 'Nome' : 'Coordenadas'}
+                    </Badge>
                   </div>
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    onClick={handleCoordinateSearch}
-                    disabled={!latitude.trim() || !longitude.trim()}
-                  >
-                    <Globe className="h-4 w-4 mr-2" />
-                    Definir Localização
-                  </Button>
-                  {selectedLocation && (
-                    <>
-                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border">
-                        <h3 className="font-semibold text-green-800 dark:text-green-200 text-sm sm:text-base">Localização Definida:</h3>
-                        <p className="text-green-700 dark:text-green-300 text-xs sm:text-sm break-all">
-                          Lat: {selectedLocation.lat.toFixed(6)}, Lng: {selectedLocation.lng.toFixed(6)}
-                        </p>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <Button
-                          onClick={handleContinueToAnalysis}
-                          className="flex-1 w-full"
-                          size="lg"
-                        >
-                          <ArrowRight className="h-4 w-4 mr-2" />
-                          Continuar para Análise
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={handleClearSelection}
-                          size="lg"
-                          className="sm:w-auto"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2 sm:mr-0" />
-                          <span className="sm:hidden">Limpar</span>
-                        </Button>
-                      </div>
-                    </>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                
+                <div className="flex-1 flex flex-col items-center justify-center p-6">
+                  <div className="text-center space-y-4">
+                    <Navigation className="h-12 w-12 mx-auto text-green-600 dark:text-green-400" />
+                    <p className="text-sm text-muted-foreground">
+                      Localização definida com sucesso
+                    </p>
+                  </div>
+                </div>
 
-
-        </div>
+                <div className="p-6 border-t space-y-3">
+                  <Button
+                    onClick={handleContinueToAnalysis}
+                    className="w-full"
+                    size="lg"
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Ir para os Dados
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleClearSelection}
+                    className="w-full"
+                    size="sm"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Limpar Seleção
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
