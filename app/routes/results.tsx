@@ -1,12 +1,13 @@
-// Página de resultados de análise climática - criada pelo Claude Sonnet 4.5
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router";
+import { useQueries } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, Loader2, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useNasaPowerData } from "~/lib/queries";
 import type { Route } from "./+types/results";
 
 export function meta({}: Route.MetaArgs) {
@@ -137,6 +138,52 @@ interface DayAnalysis {
   dadosHistoricos: WeatherData[];
 }
 
+const NasaDataFetcher = ({ latitude, longitude, dataInicio, dataFim, onDataLoaded, onLoading, onError }) => {
+  const anoAtual = new Date().getFullYear();
+  const anosPassado = 30;
+  const anoInicio = anoAtual - anosPassado;
+
+  const inicio = new Date(dataInicio);
+  const fim = new Date(dataFim);
+  const mesInicio = (inicio.getMonth() + 1).toString().padStart(2, '0');
+  const diaInicioStr = inicio.getDate().toString().padStart(2, '0');
+  const mesFim = (fim.getMonth() + 1).toString().padStart(2, '0');
+  const diaFimStr = fim.getDate().toString().padStart(2, '0');
+
+  const queries = useMemo(() => {
+    const yearQueries = [];
+    for (let ano = anoInicio; ano < anoAtual; ano++) {
+      const startDate = `${ano}${mesInicio}${diaInicioStr}`;
+      const endDate = `${ano}${mesFim}${diaFimStr}`;
+      yearQueries.push({
+        queryKey: ['nasaPowerData', { startDate, endDate, latitude, longitude }],
+        queryFn: () => useNasaPowerData({ start: startDate, end: endDate, latitude, longitude }),
+      });
+    }
+    return yearQueries;
+  }, [anoInicio, anoAtual, mesInicio, diaInicioStr, mesFim, diaFimStr, latitude, longitude]);
+
+  const results = useQueries({ queries });
+
+  useEffect(() => {
+    const isLoading = results.some(result => result.isLoading);
+    onLoading(isLoading);
+
+    const error = results.some(result => result.isError);
+    onError(error);
+
+    if (!isLoading && !error) {
+      const allData = results.map((result, index) => ({
+        year: anoInicio + index,
+        data: result.data,
+      }));
+      onDataLoaded(allData);
+    }
+  }, [results, onDataLoaded, onLoading, onError, anoInicio]);
+
+  return null;
+};
+
 export default function Results() {
   const [searchParams] = useSearchParams();
 
@@ -151,99 +198,46 @@ export default function Results() {
   const [resultado, setResultado] = useState<DayAnalysis[]>([]);
   const [melhorDia, setMelhorDia] = useState<DayAnalysis | null>(null);
   const [erro, setErro] = useState(false);
+  const [historicalData, setHistoricalData] = useState([]);
 
   const perfil = perfisEventos[perfilKey];
 
   useEffect(() => {
-    if (latitude && longitude && dataInicio && dataFim) {
-      buscarDadosHistoricos();
-    }
-  }, [latitude, longitude, dataInicio, dataFim]);
-
-  const buscarDadosHistoricos = async () => {
-    setLoading(true);
-    setErro(false);
-
-    try {
-      // Gerar lista de dias no range
+    if (historicalData.length > 0) {
+      const diasParaAnalisar: Date[] = [];
       const inicio = new Date(dataInicio);
       const fim = new Date(dataFim);
-      const diasParaAnalisar: Date[] = [];
-
       for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
         diasParaAnalisar.push(new Date(d));
       }
 
-      const anoAtual = new Date().getFullYear();
-      const anosPassado = 30;
-      const anoInicio = anoAtual - anosPassado;
-
-      // Mapa para agrupar dados históricos por dia/mês (chave: MMDD)
       const dadosPorDia = new Map<string, WeatherData[]>();
 
-      // Inicializar o mapa com arrays vazios para cada dia
       diasParaAnalisar.forEach(dia => {
         const chave = `${(dia.getMonth() + 1).toString().padStart(2, '0')}${dia.getDate().toString().padStart(2, '0')}`;
         dadosPorDia.set(chave, []);
       });
 
-      // Calcular range de datas (formato YYYYMMDD)
-      const mesInicio = (inicio.getMonth() + 1).toString().padStart(2, '0');
-      const diaInicioStr = inicio.getDate().toString().padStart(2, '0');
-      const mesFim = (fim.getMonth() + 1).toString().padStart(2, '0');
-      const diaFimStr = fim.getDate().toString().padStart(2, '0');
+      historicalData.forEach(item => {
+        if (item.data?.properties?.parameter) {
+          const p = item.data.properties.parameter;
+          const datas = Object.keys(p.T2M_MAX || {});
+          datas.forEach(dateStr => {
+            const mmdd = dateStr.substring(4, 8);
+            if (dadosPorDia.has(mmdd)) {
+              dadosPorDia.get(mmdd)?.push({
+                ano: item.year,
+                temp_max: p.T2M_MAX?.[dateStr] ?? NaN,
+                temp_min: p.T2M_MIN?.[dateStr] ?? NaN,
+                precipitacao: p.PRECTOTCORR?.[dateStr] ?? NaN,
+                vento: p.WS10M?.[dateStr] ?? NaN,
+                umidade: p.RH2M?.[dateStr] ?? NaN
+              });
+            }
+          });
+        }
+      });
 
-      // Para cada ano histórico, buscar dados do range completo
-      const todasPromessas = [];
-
-      for (let ano = anoInicio; ano < anoAtual; ano++) {
-        const startDate = `${ano}${mesInicio}${diaInicioStr}`;
-        const endDate = `${ano}${mesFim}${diaFimStr}`;
-
-        const params = new URLSearchParams({
-          start: startDate,
-          end: endDate,
-          latitude: latitude.toString(),
-          longitude: longitude.toString(),
-          community: 'ag',
-          parameters: 'T2M_MAX,T2M_MIN,PRECTOTCORR,WS10M,RH2M',
-          format: 'json'
-        });
-
-        todasPromessas.push(
-          fetch(`https://power.larc.nasa.gov/api/temporal/daily/point?${params}`)
-            .then(res => res.json())
-            .then(data => {
-              if (data?.properties?.parameter) {
-                const p = data.properties.parameter;
-
-                // Processar cada dia retornado no range
-                const datas = Object.keys(p.T2M_MAX || {});
-                datas.forEach(dateStr => {
-                  // Extrair mês/dia da data (formato YYYYMMDD -> MMDD)
-                  const mmdd = dateStr.substring(4, 8);
-
-                  if (dadosPorDia.has(mmdd)) {
-                    dadosPorDia.get(mmdd)?.push({
-                      ano,
-                      temp_max: p.T2M_MAX?.[dateStr] ?? NaN,
-                      temp_min: p.T2M_MIN?.[dateStr] ?? NaN,
-                      precipitacao: p.PRECTOTCORR?.[dateStr] ?? NaN,
-                      vento: p.WS10M?.[dateStr] ?? NaN,
-                      umidade: p.RH2M?.[dateStr] ?? NaN
-                    });
-                  }
-                });
-              }
-              return ano;
-            })
-            .catch(() => null)
-        );
-      }
-
-      await Promise.all(todasPromessas);
-
-      // Analisar cada dia com seus dados históricos agrupados
       const analisesPorDia: DayAnalysis[] = [];
 
       diasParaAnalisar.forEach(diaAtual => {
@@ -264,19 +258,13 @@ export default function Results() {
 
       setResultado(analisesPorDia);
 
-      // Determinar o melhor dia
       const melhor = analisesPorDia.reduce((prev, current) =>
         current.probabilidade > prev.probabilidade ? current : prev
       );
       setMelhorDia(melhor);
-
-    } catch (error) {
-      console.error('Erro ao buscar dados:', error);
-      setErro(true);
-    } finally {
       setLoading(false);
     }
-  };
+  }, [historicalData, dataInicio, dataFim]);
 
   const analisarDados = (dados: WeatherData[], data: Date): DayAnalysis => {
     const criterios = perfil.criterios;
@@ -390,6 +378,17 @@ export default function Results() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-3 sm:p-6">
+      {latitude && longitude && dataInicio && dataFim && (
+        <NasaDataFetcher
+          latitude={latitude}
+          longitude={longitude}
+          dataInicio={dataInicio}
+          dataFim={dataFim}
+          onDataLoaded={setHistoricalData}
+          onLoading={setLoading}
+          onError={setErro}
+        />
+      )}
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
@@ -472,7 +471,7 @@ export default function Results() {
                 <p className="text-muted-foreground">
                   Não foi possível obter os dados climáticos da NASA. Por favor, tente novamente.
                 </p>
-                <Button onClick={buscarDadosHistoricos}>
+                <Button onClick={() => window.location.reload()}>
                   Tentar Novamente
                 </Button>
               </div>
