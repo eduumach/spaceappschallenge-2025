@@ -294,7 +294,7 @@ export default function Home() {
               <CardDescription className="text-xs mt-1">{t('map.description')}</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="h-[280px] sm:h-[320px] lg:h-[350px]">
+              <div className="h-[500px] sm:h-[600px] lg:h-[700px] p-3 ">
                 <MapPicker onLocationSelect={handleLocationSelect} searchLocation={selectedLocation} />
               </div>
             </CardContent>
