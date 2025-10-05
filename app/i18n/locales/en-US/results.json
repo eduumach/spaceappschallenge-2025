@@ -74,6 +74,13 @@
     "copied": "Link copied!",
     "error": "Error sharing"
   },
+  "temperature": {
+    "unit": {
+      "celsius": "Celsius (°C)",
+      "fahrenheit": "Fahrenheit (°F)"
+    },
+    "toggle": "Toggle temperature unit"
+  },
   "methodology": {
     "title": "How do we calculate these percentages?",
     "intro": "The percentages represent the probability of ideal weather conditions based on NASA historical data. For each date, we analyze:",

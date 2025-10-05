@@ -74,6 +74,13 @@
     "copied": "Link copiado!",
     "error": "Erro ao compartilhar"
   },
+  "temperature": {
+    "unit": {
+      "celsius": "Celsius (°C)",
+      "fahrenheit": "Fahrenheit (°F)"
+    },
+    "toggle": "Alternar unidade de temperatura"
+  },
   "methodology": {
     "title": "Como calculamos essas porcentagens?",
     "intro": "As porcentagens representam a probabilidade de condições climáticas ideais baseadas em dados históricos da NASA. Para cada data, analisamos:",

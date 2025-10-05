@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
-import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw, Share2, Thermometer } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { EventProfileService } from "~/lib/services/event-profiles.service";
@@ -16,6 +16,7 @@ import { DateSuggestionsService } from "~/lib/services/date-suggestions.service"
 import { ProbabilityFormatterService } from "~/lib/services/probability-formatter.service";
 import { useTranslation } from "~/i18n/useTranslation";
 import { useToast } from "~/components/toast-provider";
+import { formatTemperature, type TemperatureUnit } from "~/lib/utils/temperature";
 import type { DayAnalysis } from "~/lib/types/weather.types";
 import type { Route } from "./+types/results";
 
@@ -35,6 +36,11 @@ export default function Results() {
   const { showToast } = useToast();
 
   const currentLocale = i18n.language === 'en-US' ? enUS : ptBR;
+
+  // Temperature unit based on user's language preference
+  const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>(
+    i18n.language === 'en-US' ? 'fahrenheit' : 'celsius'
+  );
 
   const latitude = parseFloat(searchParams.get('lat') || '0');
   const longitude = parseFloat(searchParams.get('lng') || '0');
@@ -248,10 +254,24 @@ export default function Results() {
           {/* Event Info */}
           <Card className="border-2 shadow-lg">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                {t('eventInfo.title')}
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  {t('eventInfo.title')}
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTemperatureUnit(prev => prev === 'celsius' ? 'fahrenheit' : 'celsius')}
+                  className="flex items-center gap-1.5"
+                  title={t('temperature.toggle')}
+                >
+                  <Thermometer className="h-4 w-4" />
+                  <span className="text-xs font-medium">
+                    {temperatureUnit === 'celsius' ? '°C' : '°F'}
+                  </span>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -500,16 +520,16 @@ export default function Results() {
                               <p>{t('methodology.criteria.description')}</p>
                               <ul className="list-disc list-inside ml-2 space-y-1">
                                 {Object.entries(perfil.criteria).map(([key, value]: [string, any]) => {
-                                  const criteriaLabels: Record<string, { unit: string }> = {
-                                    temp_min_ideal: { unit: '°C' },
-                                    temp_max_ideal: { unit: '°C' },
+                                  const criteriaLabels: Record<string, { unit: string; isTemp?: boolean }> = {
+                                    temp_min_ideal: { unit: '°C', isTemp: true },
+                                    temp_max_ideal: { unit: '°C', isTemp: true },
                                     precipitation_max: { unit: 'mm' },
                                     wind_max: { unit: 'km/h' },
                                     humidity_min: { unit: '%' },
                                     humidity_max: { unit: '%' },
                                   };
 
-                                  const { unit } = criteriaLabels[key] || { unit: '' };
+                                  const { unit, isTemp } = criteriaLabels[key] || { unit: '' };
                                   const label = t(`methodology.criteria.labels.${key}`, { defaultValue: key });
                                   const isMin = key.includes('_min');
                                   const isMax = key.includes('_max');
@@ -519,9 +539,14 @@ export default function Results() {
                                       ? t('methodology.criteria.maxLabel')
                                       : '';
 
+                                  // Format temperature value if it's a temperature criterion
+                                  const displayValue = isTemp
+                                    ? formatTemperature(value, temperatureUnit)
+                                    : `${value}${unit}`;
+
                                   return (
                                     <li key={key}>
-                                      <span className="font-medium">{label}</span>: {minMaxLabel} {value}{unit}
+                                      <span className="font-medium">{label}</span>: {minMaxLabel} {displayValue}
                                     </li>
                                   );
                                 })}
@@ -615,7 +640,7 @@ export default function Results() {
                     <div key={d.year} className="p-3 rounded-lg border border-border bg-muted/50 text-center">
                       <div className="font-bold text-lg">{d.year}</div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        {d.temp_min.toFixed(0)}° - {d.temp_max.toFixed(0)}°C
+                        {formatTemperature(d.temp_min, temperatureUnit)} - {formatTemperature(d.temp_max, temperatureUnit)}
                       </div>
                     </div>
                   ))}
