@@ -19,13 +19,7 @@ Este projeto responde ao desafio **"Vai chover na minha parada?"** da NASA, cons
 
 ### Fonte Principal: NASA POWER API
 
-Utilizamos a [**NASA POWER API**](https://power.larc.nasa.gov/) (Prediction Of Worldwide Energy Resources), que fornece dados meteorológicos globais coletados ao longo de **várias décadas**.
-
-**Variáveis Climáticas Analisadas**:
-- **Temperatura** (T2M_MAX, T2M_MIN, T2M): Detecção de condições "muito quentes" ou "muito frias"
-- **Precipitação** (PRECTOTCORR): Probabilidade de chuva ("muito úmido")
-- **Velocidade do Vento** (WS10M): Condições "muito ventosas"
-- **Umidade Relativa** (RH2M): Níveis de conforto e condições "muito desconfortáveis"
+Utilizamos a [**NASA POWER API**](https://power.larc.nasa.gov/) (Prediction Of Worldwide Energy Resources), que fornece dados meteorológicos globais de temperatura, precipitação, vento e umidade coletados ao longo de **várias décadas**.
 
 O sistema analisa **20 anos de dados históricos** (2005-2024) para cada localização e data específica, construindo um compêndio estatístico robusto que permite identificar padrões e calcular probabilidades confiáveis.
 
@@ -33,40 +27,12 @@ O sistema analisa **20 anos de dados históricos** (2005-2024) para cada localiz
 
 ## Funcionalidades Principais
 
-### Painel Personalizado Interativo
-
-**1. Interface de Localização**
-- **Seleção por mapa interativo**: Clique em qualquer lugar do mundo
-- **Coordenadas precisas**: Latitude e longitude automáticas
-- **Cobertura global**: Qualquer local da Terra
-
-**2. Consulta Temporal Customizada**
-- **Escolha de data específica**: Qualquer dia do ano
-- **Seleção de horário**: Análise diária ou por hora específica
-- **Planejamento antecipado**: Consultas com meses de antecedência
-
-**3. Perfis de Eventos Predefinidos**
-- **Piquenique**: Temperatura amena, sem chuva, vento leve
-- **Casamento ao ar livre**: Clima perfeito, zero precipitação
-- **Evento esportivo**: Condições seguras para atletas
-- **Festival/Show**: Comfort para multidões
-- **Fotografia**: Condições ideais de luz e clima
-
-**4. Critérios Totalmente Personalizáveis**
-- **Definição manual**: Usuários avançados configuram limites exatos
-- **Assistente LLM**: Inteligência artificial sugere critérios ideais
-- **Thresholds ajustáveis**: Temperatura, precipitação, vento, umidade
-
-**5. Resultados Profissionais**
-- **Medidor de probabilidade**: 0-100% com classificação visual
-- **Datas alternativas**: Sugere períodos com melhores condições (±30 dias)
-- **Heatmap comparativo**: Visualiza todas as opções próximas
-- **Destacamento da melhor opção**: Identifica a data ideal automaticamente
-
-**6. Exportação de Dados**
-- **Download de resultados**: Formato CSV e JSON
-- **Metadados completos**: Unidades, fontes, timestamps
-- **Link para compartilhamento**: Facilita colaboração e planejamento em grupo
+- **Seleção de Localização**: Mapa interativo com cobertura global e coordenadas precisas
+- **Consulta Personalizada**: Escolha de data e horário com planejamento antecipado (meses de antecedência)
+- **Perfis de Eventos**: Templates predefinidos (piquenique, casamento, esportes, festival, fotografia) ou critérios customizados via assistente LLM
+- **Análise de Probabilidade**: Medidor visual 0-100% baseado em dados históricos NASA
+- **Datas Alternativas**: Heatmap comparativo (±30 dias) destacando a melhor opção
+- **Exportação Completa**: Download em CSV/JSON com metadados e compartilhamento
 ---
 
 ## Como Processamos os Dados
@@ -80,7 +46,7 @@ Nosso sistema segue um fluxo estruturado para garantir análises precisas e conf
 ### Etapas do Processamento:
 
 1. **Entrada do Usuário**: Localização (latitude/longitude) + Data específica
-2. **Consulta NASA POWER API**: Busca 20 anos de dados históricos
+2. **Consulta NASA POWER API**: Busca dados históricos (2005-2024)
 3. **Agregação de Dados**: Organiza por data do calendário
 4. **Aplicação de Critérios**: Compara com critérios do evento (temperatura, chuva, vento, umidade)
 5. **Cálculo de Probabilidades**: Análise histórica + tendências recentes
@@ -113,7 +79,7 @@ Análise ano a ano da precipitação na data escolhida:
 - **Barras Verdes**: Anos com precipitação aceitável (≤1mm)
 - **Barras Vermelhas**: Anos com chuva excessiva (>1mm)
 
-**Utilidade**: Avalia o risco de chuva e identifica anos historicamente problemáticos.
+**Insights**: Avalia o risco de chuva e identifica anos historicamente problemáticos.
 
 ---
 
@@ -127,7 +93,7 @@ Visão abrangente de todos os parâmetros climáticos:
 - **Velocidade do Vento**: Tendências e limites de segurança
 - **Umidade Relativa**: Conforto e condições atmosféricas
 
-**Utilidade**: Permite análise holística de todos os fatores climáticos simultaneamente.
+**Vantagem**: Permite análise holística de todos os fatores climáticos simultaneamente.
 
 ---
 
@@ -141,29 +107,11 @@ Cada ano é avaliado com base em **todos** os critérios definidos:
 
 **Cálculo**: `Probabilidade = (Anos Ideais / Total de Anos) × 100%`
 
-**Utilidade**: Fornece a probabilidade histórica de sucesso para seu evento.
+**Aplicação**: Fornece a probabilidade histórica de sucesso para seu evento.
 
 ---
 
-### 5. Medidor de Probabilidade
-
-![Medidor de Probabilidade](./assets/05_probability_gauge.png)
-
-Visualização intuitiva da probabilidade de condições ideais:
-
-| Faixa | Classificação | Cor |
-|-------|---------------|-----|
-| 80-100% | EXCELENTE | Verde |
-| 60-79% | BOM | Azul |
-| 40-59% | MODERADO | Amarelo |
-| 20-39% | BAIXO | Laranja |
-| 0-19% | MUITO BAIXO | Vermelho |
-
-**Utilidade**: Apresenta de forma visual e imediata a viabilidade do evento.
-
----
-
-### 6. Mapa de Calor de Datas Alternativas
+### 5. Mapa de Calor de Datas Alternativas
 
 ![Heatmap de Datas](./assets/06_date_range_heatmap.png)
 
@@ -171,11 +119,11 @@ Compara a probabilidade da data escolhida com datas próximas (±15 dias):
 - **Borda Azul**: Data selecionada pelo usuário
 - **Borda Dourada**: Melhor alternativa identificada ★
 
-**Utilidade**: Sugere datas melhores caso a escolhida não seja ideal.
+**Benefício**: Sugere datas melhores caso a escolhida não seja ideal.
 
 ---
 
-### 7. Análise de Tendências Climáticas
+### 6. Análise de Tendências Climáticas
 
 ![Análise de Tendências](./assets/07_trend_analysis.png)
 
@@ -188,11 +136,11 @@ Compara duas décadas de dados:
 - **ESTÁVEL**: Sem mudanças significativas (±10%)
 - **NEGATIVA**: Condições piorando (-10% ou mais)
 
-**Utilidade**: Identifica mudanças climáticas locais e ajusta expectativas.
+**Insights**: Identifica mudanças climáticas locais e ajusta expectativas.
 
 ---
 
-### 8. Infográfico Resumo
+### 7. Infográfico Resumo
 
 ![Infográfico de Resumo](./assets/10_summary_infographic.png)
 
@@ -201,7 +149,7 @@ Dashboard completo com todas as métricas principais:
 - **Temperatura Média**: Média das máximas
 - **Distribuição de Chuva**: Proporção de dias secos vs. chuvosos
 - **Análise de Vento**: Anos seguros vs. ventos fortes
-- **Timeline Histórica**: Visualização ano a ano dos últimos 20 anos
+- **Timeline Histórica**: Visualização ano a ano (2005-2024)
 
 **Utilidade**: Visão completa e executiva para tomada de decisão rápida.
 
@@ -244,52 +192,47 @@ Baixe os resultados em CSV ou JSON
 
 ## Metodologia Científica
 
-### Por Que Não É Uma Previsão do Tempo?
-
-**Diferença Fundamental**:
-- **Previsões meteorológicas**: Baseadas em modelos preditivos, limitadas a 1-2 semanas
-- **Nosso sistema**: Baseado em **dados históricos**, permite planejamento com **meses de antecedência**
-
-**Vantagem**: Enquanto previsões tradicionais não podem prever condições para daqui a 6 meses, nossos dados históricos mostram que "historicamente, 85% das vezes nesta data as condições foram ideais".
-
 ### Dados Utilizados
 
 **Fonte Principal**: [NASA POWER API](https://power.larc.nasa.gov/)
 - **Sistema**: Prediction Of Worldwide Energy Resources
-- **Período de Análise**: Últimos 20 anos (2005-2024)
+- **Período de Análise**: 2005-2024 (duas décadas)
 - **Cobertura**: Global (qualquer ponto da Terra)
 - **Resolução Temporal**: Diária ou horária
 - **Resolução Espacial**: 0.5° × 0.5° (~55km no equador)
 
 **Parâmetros Medidos** (Detecção de Condições Adversas):
 
-| Parâmetro | Código NASA | Descrição | Detecta |
-|-----------|-------------|-----------|---------|
-| Temperatura Máxima | `T2M_MAX` | Temperatura a 2m (°C) | "Muito quente" |
-| Temperatura Mínima | `T2M_MIN` | Temperatura a 2m (°C) | "Muito frio" |
-| Precipitação | `PRECTOTCORR` | Chuva corrigida (mm/dia) | "Muito úmido" |
-| Velocidade do Vento | `WS10M` | Vento a 10m (m/s) | "Muito ventoso" |
-| Umidade Relativa | `RH2M` | Umidade a 2m (%) | "Muito desconfortável" |
+- **`T2M_MAX` / `T2M_MIN`** — Temperatura a 2m (°C)
+  Detecta: condições **"muito quentes"** ou **"muito frias"**
+
+- **`PRECTOTCORR`** — Precipitação corrigida (mm/dia)
+  Detecta: condições **"muito úmidas"** (chuva)
+
+- **`WS10M`** — Velocidade do vento a 10m (m/s)
+  Detecta: condições **"muito ventosas"**
+
+- **`RH2M`** — Umidade relativa a 2m (%)
+  Detecta: condições **"muito desconfortáveis"**
 
 ---
 
-## Benefícios
+## Benefícios e Impacto
 
 ### Para Organizadores de Eventos
-- Redução de cancelamentos e adiamentos
+- Redução de cancelamentos, adiamentos e prejuízos
 - Melhor planejamento de contingências
-- Maior satisfação dos participantes
-- Economia com planos B desnecessários
+- Maior satisfação e segurança dos participantes
 
 ### Para Participantes
 - Confiança na realização do evento
 - Preparação adequada (roupas, equipamentos)
-- Segurança e conforto garantidos
+- Maior conforto e segurança em atividades ao ar livre
 
 ### Para a Comunidade
-- Democratização de dados científicos
+- Democratização do acesso a dados científicos de qualidade
 - Decisões baseadas em evidências
-- Conscientização sobre mudanças climáticas
+- Conscientização sobre mudanças climáticas locais
 
 ---
 
@@ -310,16 +253,9 @@ Este sistema resolve o desafio proposto pela NASA ao criar uma ponte acessível 
 
 **Nossa Contribuição**:
 - **Interface personalizada** que qualquer pessoa pode usar
-- **Probabilidades precisas** baseadas em 20 anos de dados NASA
+- **Probabilidades precisas** baseadas em dados históricos NASA (2005-2024)
 - **Visualizações claras** que tornam dados complexos compreensíveis
 - **Planejamento antecipado** que previsões tradicionais não conseguem oferecer
-
-**Impacto Real**:
-Ao democratizar o acesso à informação climática de qualidade, empoderamos indivíduos e organizações a:
-- Reduzir cancelamentos e prejuízos
-- Aumentar a segurança em atividades ao ar livre
-- Tomar decisões baseadas em evidências científicas
-- Estar mais bem preparados para as condições reais
 
 **A ciência da NASA ao serviço das pessoas. Dados de observação da Terra para todos.**
 
