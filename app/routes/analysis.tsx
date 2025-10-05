@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Calendar as CalendarComponent } from "~/components/ui/calendar";
+import { Header } from "~/components/header";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { ArrowLeft, MapPin, Calendar, ArrowRight, Cloud, Satellite } from "lucide-react";
+import { ArrowLeft, Calendar, ArrowRight, Cloud, Satellite } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "~/lib/utils";
@@ -13,7 +14,7 @@ import { EventProfileService } from "~/lib/services/event-profiles.service";
 import type { Route } from "./+types/analysis";
 import type { DateRange } from "react-day-picker";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "Space Apps Challenge 2025 - Análise de Dados" },
     { name: "description", content: "Análise de dados NASA para a localização selecionada" },
@@ -76,175 +77,125 @@ export default function Analysis() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Link to="/">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              Vai Chover na Minha Parada?
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
+    <div>
+      <Header />
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-6">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4 mb-2">
+              <Link to="/">
+                <Button variant="ghost" size="icon">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                Análise de Dados Climáticos
+              </h1>
+            </div>
+            <p className="text-base sm:text-lg text-muted-foreground ml-12">
               Configure seu evento e veja as probabilidades climáticas
             </p>
           </div>
-        </div>
 
-        <Card className="border-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Latitude</p>
-                <p className="font-mono text-sm sm:text-base">{latitude.toFixed(6)}</p>
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Calendar className="h-5 w-5 text-primary" />
+                Período do Evento
+              </CardTitle>
+              <CardDescription>
+                Selecione um intervalo de datas para análise de dados históricos
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Label className="text-base">Selecione o período</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal text-base h-auto py-3",
+                        !dateRange && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {dateRange?.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "dd 'de' MMMM", { locale: ptBR })} -{" "}
+                            {format(dateRange.to, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                          </>
+                        ) : (
+                          format(dateRange.from, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                        )
+                      ) : (
+                        <span>Selecione um período</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="range"
+                      selected={dateRange}
+                      onSelect={setDateRange}
+                      locale={ptBR}
+                      disabled={(date) => date < new Date("1900-01-01")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Longitude</p>
-                <p className="font-mono text-sm sm:text-base">{longitude.toFixed(6)}</p>
-              </div>
-              {locationName && (
-                <div className="space-y-1 sm:col-span-1">
-                  <p className="text-sm font-medium text-muted-foreground">Local</p>
-                  <p className="font-medium text-sm sm:text-base truncate">{locationName}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="border-2 bg-gradient-to-br from-neutral-50 to-cyan-50 dark:from-neutral-950/20 dark:to-cyan-950/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Satellite className="h-5 w-5 text-neutral-600" />
-              Consulta de Dados NASA
-              <Cloud className="h-5 w-5 text-blue-600" />
-              Tipo de Evento
-            </CardTitle>
-            <CardDescription>
-              Selecione o tipo de evento para análise personalizada
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {Object.entries(eventProfiles).map(([key, profile]) => (
-                <button
-                  key={key}
-                  onClick={() => setPerfilSelecionado(key)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left ${
-                    perfilSelecionado === key
-                      ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/50 shadow-md'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
-                  }`}
-                >
-                  <div className="text-3xl mb-2">{profile.emoji}</div>
-                  <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
-                    {profile.name}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {profile.description}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid md:grid-cols-2 gap-6">
           <Card className="border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-green-600" />
-                Análise Temporal
+                <Satellite className="h-5 w-5 text-primary" />
+                Tipo de Evento
               </CardTitle>
+              <CardDescription>
+                Selecione o tipo de evento para análise personalizada
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Aqui você poderá visualizar dados históricos e tendências para esta localização.
-              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {Object.entries(eventProfiles).map(([key, profile]) => (
+                  <button
+                    key={key}
+                    onClick={() => setPerfilSelecionado(key)}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${perfilSelecionado === key
+                        ? 'border-primary bg-primary/10 dark:bg-primary/20 shadow-md'
+                        : 'border-border hover:border-primary/50'
+                      }`}
+                  >
+                    <div className="text-sm font-semibold text-foreground mb-1">
+                      {profile.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {profile.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        {/* Date Selection */}
-        <Card className="border-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <Calendar className="h-5 w-5 text-green-600" />
-              Período do Evento
-            </CardTitle>
-            <CardDescription>
-              Selecione um intervalo de datas para análise de dados históricos
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label className="text-base">Selecione o período</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal text-base h-auto py-3",
-                      !dateRange && "text-muted-foreground"
-                    )}
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {dateRange?.from ? (
-                      dateRange.to ? (
-                        <>
-                          {format(dateRange.from, "dd 'de' MMMM", { locale: ptBR })} -{" "}
-                          {format(dateRange.to, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                        </>
-                      ) : (
-                        format(dateRange.from, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                      )
-                    ) : (
-                      <span>Selecione um período</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="range"
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    numberOfMonths={2}
-                    locale={ptBR}
-                    disabled={(date) => date < new Date("1900-01-01")}
-                  />
-                </PopoverContent>
-              </Popover>
-              {dateRange?.from && dateRange?.to && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Período selecionado: {format(dateRange.from, "dd/MM/yyyy")} até {format(dateRange.to, "dd/MM/yyyy")}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Continue Button */}
-        <div className="flex justify-end pt-4">
-          <Button
-            onClick={handleContinueToResults}
-            size="lg"
-            className="w-full sm:w-auto"
-            disabled={!dateRange?.from || !dateRange?.to}
-          >
-            <ArrowRight className="h-5 w-5 mr-2" />
-            Ver Probabilidades
-          </Button>
+          <div className="flex justify-end pt-4">
+            <Button
+              onClick={handleContinueToResults}
+              size="lg"
+              className="w-full sm:w-auto"
+              disabled={!dateRange?.from || !dateRange?.to}
+            >
+              <ArrowRight className="h-5 w-5 mr-2" />
+              Ver Probabilidades
+            </Button>
+          </div>
         </div>
       </div>
     </div>
-    </div>
+
   );
 }
