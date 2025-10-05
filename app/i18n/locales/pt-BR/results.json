@@ -66,5 +66,37 @@
   "buttons": {
     "editAnalysis": "Editar Análise",
     "newAnalysis": "Nova Análise"
+  },
+  "methodology": {
+    "title": "Como calculamos essas porcentagens?",
+    "intro": "As porcentagens representam a probabilidade de condições climáticas ideais baseadas em dados históricos da NASA. Para cada data, analisamos:",
+    "recent10Years": {
+      "title": "Dados dos Últimos 10 Anos ({{years}} anos)",
+      "description": "Analisamos os dados de {{startYear}} a 2024 para identificar tendências recentes no clima. Dos {{totalYears}} anos analisados, {{idealYears}} tiveram condições ideais, resultando em {{probability}}% de probabilidade."
+    },
+    "fullHistory": {
+      "title": "Dados Históricos Completos ({{years}} anos)",
+      "description": "Para uma visão mais abrangente, incluímos dados de até 20 anos atrás. Dos {{totalYears}} anos com dados disponíveis, {{idealYears}} apresentaram condições ideais, gerando {{probability}}% de probabilidade."
+    },
+    "criteria": {
+      "title": "Critérios de Avaliação",
+      "description": "Cada ano é considerado \"ideal\" quando:",
+      "labels": {
+        "temp_min_ideal": "Temperatura mínima",
+        "temp_max_ideal": "Temperatura máxima",
+        "precipitation_max": "Precipitação máxima",
+        "wind_max": "Vento máximo",
+        "humidity_min": "Umidade mínima",
+        "humidity_max": "Umidade máxima"
+      },
+      "minLabel": "mínimo de",
+      "maxLabel": "máximo de"
+    },
+    "whyTwo": {
+      "title": "Por que duas porcentagens?",
+      "description": "Apresentamos ambas as métricas para você tomar uma decisão informada:",
+      "recent": "Últimos 10 anos: Reflete tendências climáticas mais recentes",
+      "full": "20 anos completos: Oferece uma perspectiva histórica mais ampla"
+    }
   }
 }

@@ -66,5 +66,37 @@
   "buttons": {
     "editAnalysis": "Edit Analysis",
     "newAnalysis": "New Analysis"
+  },
+  "methodology": {
+    "title": "How do we calculate these percentages?",
+    "intro": "The percentages represent the probability of ideal weather conditions based on NASA historical data. For each date, we analyze:",
+    "recent10Years": {
+      "title": "Last 10 Years Data ({{years}} years)",
+      "description": "We analyzed data from {{startYear}} to 2024 to identify recent climate trends. Of the {{totalYears}} years analyzed, {{idealYears}} had ideal conditions, resulting in {{probability}}% probability."
+    },
+    "fullHistory": {
+      "title": "Complete Historical Data ({{years}} years)",
+      "description": "For a broader view, we include data from up to 20 years ago. Of the {{totalYears}} years with available data, {{idealYears}} presented ideal conditions, generating {{probability}}% probability."
+    },
+    "criteria": {
+      "title": "Evaluation Criteria",
+      "description": "Each year is considered \"ideal\" when:",
+      "labels": {
+        "temp_min_ideal": "Minimum temperature",
+        "temp_max_ideal": "Maximum temperature",
+        "precipitation_max": "Maximum precipitation",
+        "wind_max": "Maximum wind",
+        "humidity_min": "Minimum humidity",
+        "humidity_max": "Maximum humidity"
+      },
+      "minLabel": "minimum of",
+      "maxLabel": "maximum of"
+    },
+    "whyTwo": {
+      "title": "Why two percentages?",
+      "description": "We present both metrics so you can make an informed decision:",
+      "recent": "Last 10 years: Reflects more recent climate trends",
+      "full": "Complete 20 years: Offers a broader historical perspective"
+    }
   }
 }

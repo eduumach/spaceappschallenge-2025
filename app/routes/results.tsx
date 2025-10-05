@@ -5,6 +5,7 @@ import { Header } from "~/components/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
 import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
@@ -420,6 +421,99 @@ export default function Results() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Accordion explicando as porcentagens */}
+              <div className="mt-6">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="methodology">
+                    <AccordionTrigger className="text-sm">
+                      {t('methodology.title')}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4 text-sm text-muted-foreground">
+                        <p>
+                          {t('methodology.intro')}
+                        </p>
+
+                        <div className="space-y-3">
+                          <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                            <div className="font-semibold text-foreground mb-1">
+                              {t('methodology.recent10Years.title', { years: melhorDia.totalRecentYears })}
+                            </div>
+                            <p className="text-xs">
+                              {t('methodology.recent10Years.description', {
+                                startYear: 2025 - 10,
+                                totalYears: melhorDia.totalRecentYears,
+                                idealYears: melhorDia.idealRecentYears,
+                                probability: melhorDia.recentProbability.toFixed(1)
+                              })}
+                            </p>
+                          </div>
+
+                          <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                            <div className="font-semibold text-foreground mb-1">
+                              {t('methodology.fullHistory.title', { years: melhorDia.totalYears })}
+                            </div>
+                            <p className="text-xs">
+                              {t('methodology.fullHistory.description', {
+                                totalYears: melhorDia.totalYears,
+                                idealYears: melhorDia.idealYears,
+                                probability: melhorDia.probability.toFixed(1)
+                              })}
+                            </p>
+                          </div>
+
+                          <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                            <div className="font-semibold text-foreground mb-1">{t('methodology.criteria.title')}</div>
+                            <div className="text-xs space-y-1">
+                              <p>{t('methodology.criteria.description')}</p>
+                              <ul className="list-disc list-inside ml-2 space-y-1">
+                                {Object.entries(perfil.criteria).map(([key, value]: [string, any]) => {
+                                  const criteriaLabels: Record<string, { unit: string }> = {
+                                    temp_min_ideal: { unit: '°C' },
+                                    temp_max_ideal: { unit: '°C' },
+                                    precipitation_max: { unit: 'mm' },
+                                    wind_max: { unit: 'km/h' },
+                                    humidity_min: { unit: '%' },
+                                    humidity_max: { unit: '%' },
+                                  };
+
+                                  const { unit } = criteriaLabels[key] || { unit: '' };
+                                  const label = t(`methodology.criteria.labels.${key}`, { defaultValue: key });
+                                  const isMin = key.includes('_min');
+                                  const isMax = key.includes('_max');
+                                  const minMaxLabel = isMin
+                                    ? t('methodology.criteria.minLabel')
+                                    : isMax
+                                      ? t('methodology.criteria.maxLabel')
+                                      : '';
+
+                                  return (
+                                    <li key={key}>
+                                      <span className="font-medium">{label}</span>: {minMaxLabel} {value}{unit}
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          </div>
+
+                          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                            <div className="font-semibold text-foreground mb-1">{t('methodology.whyTwo.title')}</div>
+                            <p className="text-xs">
+                              {t('methodology.whyTwo.description')}
+                            </p>
+                            <ul className="list-disc list-inside ml-2 space-y-1 text-xs mt-2">
+                              <li>{t('methodology.whyTwo.recent')}</li>
+                              <li>{t('methodology.whyTwo.full')}</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </CardContent>
           </Card>
