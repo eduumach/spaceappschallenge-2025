@@ -1,5 +1,5 @@
 // Página criada pelo Claude Sonnet 4.5
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Header } from "~/components/header";
 import { MapPicker } from "~/components/map-picker";
@@ -10,8 +10,10 @@ import { Input } from "~/components/ui/input";
 import { useToast } from "~/components/toast-provider";
 import { useTranslation } from "~/i18n";
 
-import { MapPin, Navigation, Search, Trash2, Loader2, Globe, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Search, Trash2, Loader2, Globe, ArrowRight } from "lucide-react";
 import type { Route } from "./+types/home";
+
+const STORAGE_KEY = 'spaceapps_selected_location';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -30,13 +32,61 @@ export default function Home() {
   const [activeMethod, setActiveMethod] = useState<'map' | 'name' | 'coordinates'>('map');
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-  const [isModalExpanded, setIsModalExpanded] = useState(true);
+
+  // Carregar dados do localStorage ao montar o componente
+  useEffect(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        setSelectedLocation(parsed.selectedLocation);
+        setLocationName(parsed.locationName || "");
+        setActiveMethod(parsed.activeMethod || 'map');
+        setLatitude(parsed.latitude || "");
+        setLongitude(parsed.longitude || "");
+      } catch (error) {
+        console.error('Erro ao carregar localização salva:', error);
+      }
+    }
+  }, []);
+
+  // Salvar dados no localStorage quando mudarem
+  useEffect(() => {
+    if (selectedLocation) {
+      const dataToSave = {
+        selectedLocation,
+        locationName,
+        activeMethod,
+        latitude,
+        longitude,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+    }
+  }, [selectedLocation, locationName, activeMethod, latitude, longitude]);
+
+  const fetchLocationName = async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.display_name) {
+          setLocationName(data.display_name);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar nome da localização:', error);
+    }
+  };
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setSelectedLocation({ lat, lng });
     setLatitude(lat.toString());
     setLongitude(lng.toString());
     setActiveMethod('map');
+    fetchLocationName(lat, lng);
   };
 
   const handleClearSelection = () => {
@@ -44,6 +94,7 @@ export default function Home() {
     setLocationName("");
     setLatitude("");
     setLongitude("");
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const handleSearch = async () => {
@@ -109,6 +160,7 @@ export default function Home() {
 
     setSelectedLocation({ lat, lng });
     setActiveMethod('coordinates');
+    fetchLocationName(lat, lng);
   };
 
   const handleCoordinateKeyPress = (e: React.KeyboardEvent) => {
@@ -134,39 +186,39 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+    <div className="min-h-screen bg-background">
       <Header />
-      <div className="p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10">
-          <div className="text-center space-y-4">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-neutral-700 to-neutral-500 dark:from-neutral-300 dark:to-neutral-100 bg-clip-text text-transparent">
+      <div className={`p-4 sm:p-6 ${selectedLocation ? 'pb-24' : ''}`}>
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5">
+          <div className="text-center space-y-2">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               {t('title')}
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground px-4">{t('subtitle')}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground px-4">{t('subtitle')}</p>
           </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           
           <Card className="overflow-hidden border-2 shadow-lg">
-            <CardHeader className="border-b p-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Search className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+            <CardHeader className="border-b p-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Search className="h-4 w-4 text-muted-foreground" />
                 {t('searchByName.title')}
-                {activeMethod === 'name' && <Badge variant="default" className="ml-2">{t('searchByName.active')}</Badge>}
+                {activeMethod === 'name' && <Badge variant="default" className="ml-2 text-xs">{t('searchByName.active')}</Badge>}
               </CardTitle>
-              <CardDescription className="text-sm">{t('searchByName.description')}</CardDescription>
+              <CardDescription className="text-xs mt-1">{t('searchByName.description')}</CardDescription>
             </CardHeader>
-            <CardContent className="p-4">
-              <div className="space-y-3">
+            <CardContent className="p-3">
+              <div className="space-y-2">
                 <Input
                   placeholder={t('searchByName.placeholder')}
                   value={locationName}
                   onChange={(e) => setLocationName(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="border-2"
+                  className="h-9"
                 />
                 <Button
-                  className="w-full"
+                  className="w-full h-9"
                   onClick={handleSearch}
                   disabled={isSearching || !locationName.trim()}
                 >
@@ -182,46 +234,46 @@ export default function Home() {
           </Card>
 
           <Card className="overflow-hidden border-2 shadow-lg">
-            <CardHeader className="border-b p-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Globe className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+            <CardHeader className="border-b p-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Globe className="h-4 w-4 text-muted-foreground" />
                 {t('coordinates.title')}
-                {activeMethod === 'coordinates' && <Badge variant="default" className="ml-2">{t('coordinates.active')}</Badge>}
+                {activeMethod === 'coordinates' && <Badge variant="default" className="ml-2 text-xs">{t('coordinates.active')}</Badge>}
               </CardTitle>
-              <CardDescription className="text-sm">{t('coordinates.description')}</CardDescription>
+              <CardDescription className="text-xs mt-1">{t('coordinates.description')}</CardDescription>
             </CardHeader>
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <CardContent className="p-3">
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <label className="text-sm font-medium mb-1 block">{t('coordinates.latitude')}</label>
+                    <label className="text-xs font-medium mb-1 block">{t('coordinates.latitude')}</label>
                     <Input
                       placeholder={t('coordinates.latitudePlaceholder')}
                       value={latitude}
                       onChange={(e) => setLatitude(e.target.value)}
                       onKeyPress={handleCoordinateKeyPress}
-                      className="border-2"
+                      className="h-9"
                       type="number"
                       step="any"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">{t('coordinates.latitudeRange')}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t('coordinates.latitudeRange')}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1 block">{t('coordinates.longitude')}</label>
+                    <label className="text-xs font-medium mb-1 block">{t('coordinates.longitude')}</label>
                     <Input
                       placeholder={t('coordinates.longitudePlaceholder')}
                       value={longitude}
                       onChange={(e) => setLongitude(e.target.value)}
                       onKeyPress={handleCoordinateKeyPress}
-                      className="border-2"
+                      className="h-9"
                       type="number"
                       step="any"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">{t('coordinates.longitudeRange')}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t('coordinates.longitudeRange')}</p>
                   </div>
                 </div>
                 <Button
-                  className="w-full"
+                  className="w-full h-9"
                   onClick={handleCoordinateSearch}
                   disabled={!latitude.trim() || !longitude.trim()}
                 >
@@ -233,86 +285,42 @@ export default function Home() {
           </Card>
 
           <Card className="overflow-hidden border-2 shadow-lg">
-            <CardHeader className="border-b p-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <MapPin className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+            <CardHeader className="border-b p-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
                 {t('map.title')}
-                {activeMethod === 'map' && <Badge variant="default" className="ml-2">{t('map.active')}</Badge>}
+                {activeMethod === 'map' && <Badge variant="default" className="ml-2 text-xs">{t('map.active')}</Badge>}
               </CardTitle>
-              <CardDescription className="text-sm">{t('map.description')}</CardDescription>
+              <CardDescription className="text-xs mt-1">{t('map.description')}</CardDescription>
             </CardHeader>
-            <CardContent className="px-4 py-0">
-              <div className="h-[400px] sm:h-[500px] lg:h-[600px]">
+            <CardContent className="p-0">
+              <div className="h-[280px] sm:h-[320px] lg:h-[350px]">
                 <MapPicker onLocationSelect={handleLocationSelect} searchLocation={selectedLocation} />
               </div>
             </CardContent>
           </Card>
+
+          {selectedLocation && <div className="h-16"></div>}
         </div>
 
         {selectedLocation && (
-          <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] shadow-xl z-[99999] flex transition-all duration-300 ${
-            isModalExpanded ? 'w-80 bg-background border-l' : 'w-12 bg-transparent'
-          }`}>
-            <div className="flex flex-col justify-start pt-4">
+          <div className="fixed bottom-0 left-0 right-0 p-3 bg-background border-t shadow-lg z-[1000]">
+            <div className="max-w-7xl mx-auto flex gap-2">
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsModalExpanded(!isModalExpanded)}
-                className={`h-12 w-12 rounded-l-lg rounded-r-none border border-r-0 hover:bg-neutral-100 dark:hover:bg-neutral-800 shadow-md bg-neutral-200 dark:bg-neutral-700 ${
-                  isModalExpanded ? '-ml-10' : 'ml-0'
-                }`}
+                onClick={handleContinueToAnalysis}
+                className="flex-1 h-10"
               >
-                {isModalExpanded ? (
-                  <ChevronRight className="h-4 w-4 text-neutral-700 dark:text-neutral-300" />
-                ) : (
-                  <ChevronLeft className="h-4 w-4 text-neutral-700 dark:text-neutral-300" />
-                )}
+                <ArrowRight className="h-4 w-4 mr-2" />
+                {t('selectedLocation.continueButton')}
+              </Button>
+              <Button
+                variant="outline"
+                className="h-10"
+                onClick={handleClearSelection}
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-
-            {isModalExpanded && (
-              <div className="flex-1 flex flex-col">
-                <div className="p-6 border-b">
-                  <h2 className="text-lg font-semibold text-center">
-                    {t('selectedLocation.title')}
-                  </h2>
-                  <div className="flex justify-center mt-2">
-                    <Badge variant="secondary">
-                      {activeMethod === 'map' ? t('selectedLocation.methodMap') : activeMethod === 'name' ? t('selectedLocation.methodName') : t('selectedLocation.methodCoordinates')}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="flex-1 flex flex-col items-center justify-center p-6">
-                  <div className="text-center space-y-4">
-                    <Navigation className="h-12 w-12 mx-auto text-green-600 dark:text-green-400" />
-                    <p className="text-sm text-muted-foreground">
-                      {t('selectedLocation.success')}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-6 border-t space-y-3">
-                  <Button
-                    onClick={handleContinueToAnalysis}
-                    className="w-full"
-                    size="lg"
-                  >
-                    <ArrowRight className="h-4 w-4 mr-2" />
-                    {t('selectedLocation.continueButton')}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleClearSelection}
-                    className="w-full"
-                    size="sm"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    {t('selectedLocation.clearButton')}
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
         )}
         </div>
