@@ -16,6 +16,7 @@ import "./app.css";
 import { ThemeProvider } from "./components/theme-provider";
 import { ToastProvider } from "./components/toast-provider";
 import i18n from "./i18n/config";
+import { useTranslation } from "./i18n";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/queijo.png", type: "image/png" },
@@ -69,15 +70,16 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
+  const { t } = useTranslation('common')
+  let message = t('oops')
+  let details = t('unexpectedError');
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? "404" : t("error");
     details =
       error.status === 404
-        ? "The requested page could not be found."
+        ? t('pageNotFound')
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;

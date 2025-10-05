@@ -12,5 +12,9 @@
       "to_dark": "Mudar para tema escuro",
       "to_system": "Mudar para tema do sistema"
     }
-  }
+  },
+  "oops": "Ops!",
+  "unexpectedError": "Ocorreu um erro inesperado.",
+  "pageNotFound": "A página solicitada não foi encontrada.",
+  "error": "Erro"
 }
