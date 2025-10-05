@@ -285,7 +285,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden border-2 shadow-lg">
+          <Card className="overflow-hidden border-2 shadow-lg p-0">
             <CardHeader className="border-b p-3">
               <CardTitle className="flex items-center gap-2 text-base">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -295,7 +295,7 @@ export default function Home() {
               <CardDescription className="text-xs mt-1">{t('map.description')}</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="h-[500px] sm:h-[600px] lg:h-[700px] p-3 ">
+              <div className="h-[500px] sm:h-[600px] lg:h-[700px]">
                 <MapPicker onLocationSelect={handleLocationSelect} searchLocation={selectedLocation} />
               </div>
             </CardContent>
