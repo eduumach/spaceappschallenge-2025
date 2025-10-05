@@ -73,7 +73,6 @@ export default function Results() {
   perfil.name = tProfiles(perfilKey + ".name");
   perfil.description = tProfiles(perfilKey + ".description");
 
-  // console.log(perfil)
   if (!perfil) {
     return (
       <div className="min-h-screen bg-background">
