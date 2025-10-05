@@ -17,7 +17,7 @@ import { ProbabilityFormatterService } from "~/lib/services/probability-formatte
 import { useTranslation } from "~/i18n/useTranslation";
 import { useToast } from "~/components/toast-provider";
 import { formatTemperature, type TemperatureUnit } from "~/lib/utils/temperature";
-import type { DayAnalysis, EventCriteria } from "~/lib/types/weather.types";
+import type { DayAnalysis, EventCriteria, EventProfile } from "~/lib/types/weather.types";
 import type { Route } from "./+types/results";
 
 export function meta({}: Route.MetaArgs) {
@@ -58,7 +58,7 @@ export default function Results() {
   const [sugestoesAlternativas, setSugestoesAlternativas] = useState<DayAnalysis[]>([]);
   
   // Decode and use the generated profile if available
-  let perfil = EventProfileService.getProfile(perfilKey) ?? EventProfileService.getProfile("custom");
+  let perfil = EventProfileService.getProfile(perfilKey) ?? EventProfileService.getProfile("custom") as EventProfile; // custom nunca vai ser null
   CRITERIA_KEYS.forEach(key => {
     const params = new URLSearchParams(location.search);
     if (params.has(key)) {
