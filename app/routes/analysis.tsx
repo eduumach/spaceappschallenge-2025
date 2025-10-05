@@ -37,7 +37,7 @@ export default function Analysis() {
 
   if (!latitude || !longitude) {
     return (
-      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-4xl mx-auto text-center pt-20">
           <h1 className="text-2xl font-bold text-destructive mb-4">Erro: Localização não encontrada</h1>
           <p className="text-muted-foreground mb-6">
@@ -77,9 +77,9 @@ export default function Analysis() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-background">
       <Header />
-      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-6">
+      <div className={`p-4 sm:p-6 ${dateRange?.from && dateRange?.to ? 'pb-24' : ''}`}>
         <div className="max-w-6xl mx-auto space-y-6">
           {/* Header */}
           <div className="mb-8">
@@ -166,7 +166,7 @@ export default function Analysis() {
                     key={key}
                     onClick={() => setPerfilSelecionado(key)}
                     className={`p-4 rounded-lg border-2 transition-all text-left ${perfilSelecionado === key
-                        ? 'border-primary bg-primary/10 dark:bg-primary/20 shadow-md'
+                        ? 'border-primary bg-primary/10 shadow-md'
                         : 'border-border hover:border-primary/50'
                       }`}
                   >
@@ -182,20 +182,23 @@ export default function Analysis() {
             </CardContent>
           </Card>
 
-          <div className="flex justify-end pt-4">
-            <Button
-              onClick={handleContinueToResults}
-              size="lg"
-              className="w-full sm:w-auto"
-              disabled={!dateRange?.from || !dateRange?.to}
-            >
-              <ArrowRight className="h-5 w-5 mr-2" />
-              Ver Probabilidades
-            </Button>
-          </div>
+          {dateRange?.from && dateRange?.to && <div className="h-16"></div>}
         </div>
+
+        {dateRange?.from && dateRange?.to && (
+          <div className="fixed bottom-0 left-0 right-0 p-3 bg-background border-t shadow-lg z-[1000]">
+            <div className="max-w-6xl mx-auto flex gap-2">
+              <Button
+                onClick={handleContinueToResults}
+                className="flex-1 h-10"
+              >
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Ver Probabilidades
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-
   );
 }
