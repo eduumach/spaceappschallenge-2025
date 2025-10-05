@@ -17,6 +17,7 @@ import { CRITERIA_KEYS, EventProfileService } from "~/lib/services/event-profile
 import { useTranslation } from "~/i18n/useTranslation";
 import type { Route } from "./+types/analysis";
 import type { DateRange } from "react-day-picker";
+import { useToast } from "~/components/toast-provider";
 
 const STORAGE_KEY = 'spaceapps_analysis_data';
 const CUSTOMIZAVEL_KEY = 'customizavel';
@@ -86,9 +87,10 @@ export default function Analysis() {
   const [criteriaQueryParams, setCriteriaQueryParams] = useState<Record<string, string>>({});
   const [useHourlyData, setUseHourlyData] = useState(false);
   const [selectedHour, setSelectedHour] = useState(12); // Default to noon
-
+  const toast = useToast()
+  
   // Carregar dados do localStorage ao montar o componente
-  useEffect(() => {
+  useEffect(() => {  
     const savedData = localStorage.getItem(STORAGE_KEY);
     if (savedData) {
       try {
@@ -228,12 +230,12 @@ export default function Analysis() {
 
   const handleContinueToResults = async () => {
     if (!dateRange?.from || !dateRange?.to) {
-      alert(t('alerts.selectDateRange'));
+      toast.showToast(t('alerts.selectDateRange'))
       return;
     }
 
     if (perfilSelecionado === 'customizavel' && !nomeEventoCustomizado.trim()) {
-      alert(t('alerts.enterCustomEventName'));
+      toast.showToast(t('alerts.enterCustomEventName'));
       return;
     }
     const params = new URLSearchParams({
@@ -277,12 +279,12 @@ export default function Analysis() {
         });
 
         if (!(result.success && result.data)) {
-          alert('Erro ao gerar perfil do evento. Tente novamente.');
+          toast.showToast('Erro ao gerar perfil do evento. Tente novamente.');
           return
         }
       } catch (error) {
         console.error('Error generating profile:', error);
-        alert('Erro ao conectar com o servidor. Tente novamente.');
+        toast.showToast('Erro ao conectar com o servidor. Tente novamente.');
         return
       } finally {
         setLoadingPerfil(false);
