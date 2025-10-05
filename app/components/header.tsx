@@ -1,3 +1,4 @@
+import { Link } from "react-router"
 import { ThemeToggle } from "~/components/theme-toggle"
 import { LanguageSelector } from "~/components/language-selector"
 
@@ -5,7 +6,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="w-full flex h-16 items-center justify-between pl-4 pr-2">
-        <div className="flex items-center space-x-3">
+        <Link to="/" className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity">
           <img
             src="/queijo.png"
             alt="Queijo Logo"
@@ -14,7 +15,7 @@ export function Header() {
           <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent" >
              Code and Cheese
           </h1>
-        </div>
+        </Link>
 
         <div className="flex items-center gap-2">
           <LanguageSelector />
