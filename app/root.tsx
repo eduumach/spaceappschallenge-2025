@@ -19,7 +19,7 @@ import { ToastProvider } from "./components/toast-provider";
 import i18n from "./i18n/config";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "icon", href: "/moon-cheese.png", type: "image/png" },
+  { rel: "icon", href: "/queijo.png", type: "image/png" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",

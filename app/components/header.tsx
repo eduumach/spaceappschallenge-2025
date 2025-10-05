@@ -7,12 +7,12 @@ export function Header() {
       <div className="w-full flex h-16 items-center justify-between pl-4 pr-2">
         <div className="flex items-center space-x-3">
           <img
-            src="/moon-cheese.png"
-            alt="Moon Cheese Logo"
+            src="/queijo.png"
+            alt="Queijo Logo"
             className="h-8 w-8] ml-2"
           />
           <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent" >
-            Moon Cheese
+             Code and Cheese
           </h1>
         </div>
 
