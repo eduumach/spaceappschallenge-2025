@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { useToast } from "~/components/toast-provider";
 
-import { MapPin, Navigation, Search, Trash2, Loader2, Database, Satellite, Calendar, Globe, MapIcon, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Navigation, Search, Trash2, Loader2, Globe, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -20,6 +21,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationName, setLocationName] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -30,7 +32,6 @@ export default function Home() {
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setSelectedLocation({ lat, lng });
-    // Atualiza os campos de coordenadas quando uma localização é selecionada
     setLatitude(lat.toString());
     setLongitude(lng.toString());
     setActiveMethod('map');
@@ -65,16 +66,15 @@ export default function Home() {
         const lng = parseFloat(result.lon);
         
         setSelectedLocation({ lat, lng });
-        // Atualiza os campos de coordenadas
         setLatitude(lat.toString());
         setLongitude(lng.toString());
         setActiveMethod('name');
       } else {
-        alert('Localização não encontrada. Tente com um nome mais específico.');
+        showToast('Localização não encontrada. Tente com um nome mais específico.', 'warning');
       }
     } catch (error) {
       console.error('Erro ao buscar localização:', error);
-      alert('Erro ao buscar localização. Tente novamente.');
+      showToast('Erro ao buscar localização. Tente novamente.', 'destructive');
     } finally {
       setIsSearching(false);
     }
@@ -91,17 +91,17 @@ export default function Home() {
     const lng = parseFloat(longitude);
     
     if (isNaN(lat) || isNaN(lng)) {
-      alert('Por favor, insira coordenadas válidas');
+      showToast('Por favor, insira coordenadas válidas', 'warning');
       return;
     }
     
     if (lat < -90 || lat > 90) {
-      alert('Latitude deve estar entre -90 e 90');
+      showToast('Latitude deve estar entre -90 e 90', 'warning');
       return;
     }
     
     if (lng < -180 || lng > 180) {
-      alert('Longitude deve estar entre -180 e 180');
+      showToast('Longitude deve estar entre -180 e 180', 'warning');
       return;
     }
     
@@ -247,9 +247,8 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Modal fixo na direita para localização selecionada */}
         {selectedLocation && (
-          <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] shadow-xl z-40 flex transition-all duration-300 ${
+          <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] shadow-xl z-[99999] flex transition-all duration-300 ${
             isModalExpanded ? 'w-80 bg-background border-l' : 'w-12 bg-transparent'
           }`}>
             <div className="flex flex-col justify-start pt-4">

@@ -14,6 +14,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { ThemeProvider } from "./components/theme-provider";
 import { Header } from "./components/header";
+import { ToastProvider } from "./components/toast-provider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/moon-cheese.png", type: "image/png" },
@@ -55,7 +56,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="theme">
-        <Outlet />
+        <ToastProvider>
+          <Outlet />
+        </ToastProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
