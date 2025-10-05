@@ -1,0 +1,46 @@
+{
+  "praia": {
+    "name": "Beach",
+    "description": "Strong sun, intense heat, clear sky"
+  },
+  "churrasco": {
+    "name": "BBQ",
+    "description": "No rain, warm or pleasant weather"
+  },
+  "pelada": {
+    "name": "Pickup Soccer",
+    "description": "Brazilians play soccer in any heat!"
+  },
+  "festa_junina": {
+    "name": "June Festival",
+    "description": "Brazilian winter weather, cool at night"
+  },
+  "samba_pagode": {
+    "name": "Outdoor Samba/Pagode",
+    "description": "Hot and lively weather to enjoy"
+  },
+  "carnaval": {
+    "name": "Street Carnival",
+    "description": "ABSURD Brazilian summer heat!"
+  },
+  "volei_praia": {
+    "name": "Beach Volleyball",
+    "description": "Hot sand, sun at its peak"
+  },
+  "pescaria": {
+    "name": "Fishing",
+    "description": "Calm morning, moderate temperature"
+  },
+  "piquenique": {
+    "name": "Park Picnic",
+    "description": "Pleasant day without extreme heat"
+  },
+  "trilha": {
+    "name": "Trail/Hiking",
+    "description": "Mild weather, may have light rain in the forest"
+  },
+  "customizavel": {
+    "name": "Customizable",
+    "description": "Define your own event type"
+  }
+}

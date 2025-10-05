@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "title": "Results - Will It Rain On My Event?",
+    "description": "Weather probability analysis based on NASA historical data"
+  },
+  "errors": {
+    "invalidProfile": {
+      "title": "Error: Invalid event profile",
+      "message": "The selected event type was not found.",
+      "backButton": "Back"
+    },
+    "insufficientData": {
+      "title": "Error: Insufficient data",
+      "message": "Required information was not provided. Please go back and complete all steps.",
+      "backButton": "Back"
+    },
+    "fetchError": {
+      "title": "Error fetching data",
+      "message": "Could not obtain NASA weather data. Please try again.",
+      "retryButton": "Try Again"
+    }
+  },
+  "header": {
+    "title": "Analysis Results",
+    "subtitle": "Weather probabilities based on 20 years of NASA data"
+  },
+  "eventInfo": {
+    "title": "Event Information",
+    "eventType": "Event Type",
+    "period": "Period",
+    "coordinates": "Coordinates",
+    "location": "Location"
+  },
+  "loading": {
+    "analyzing": "Analyzing 20 years of NASA historical data...",
+    "wait": "This may take a few seconds"
+  },
+  "bestDay": {
+    "title": "Best Day of the Period",
+    "probability": "Ideal Weather Probability",
+    "basedOn": "Based on {{years}} years of data ({{idealYears}} ideal years)"
+  },
+  "alternatives": {
+    "title": "Alternative Date Suggestions",
+    "description": "Nearby dates (±30 days) with higher probability of ideal weather",
+    "proximity": "{{text}} from selected date",
+    "yearsData": "{{idealYears}} of {{totalYears}} years"
+  },
+  "trend": {
+    "title": "Climate Trend",
+    "description": "Comparison between recent data and complete history",
+    "recent10Years": "Last 10 Years",
+    "fullHistory": "Complete History (20 years)",
+    "yearsCount": "{{idealYears}} of {{totalYears}} years"
+  },
+  "comparison": {
+    "title": "All Days in Period",
+    "description": "Ideal weather probability for each day",
+    "bestBadge": "Best",
+    "yearsFormat": "{{idealYears}}/{{totalYears}} years"
+  },
+  "idealYears": {
+    "title": "Examples of Ideal Years ({{date}})",
+    "description": "Some years with ideal weather on this date"
+  },
+  "buttons": {
+    "editAnalysis": "Edit Analysis",
+    "newAnalysis": "New Analysis"
+  }
+}

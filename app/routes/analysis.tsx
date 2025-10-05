@@ -9,16 +9,18 @@ import { Header } from "~/components/header";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { ArrowLeft, Calendar, ArrowRight, MousePointer2 } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ptBR, enUS } from "date-fns/locale";
 import { cn } from "~/lib/utils";
 import { EventProfileService } from "~/lib/services/event-profiles.service";
+import { useTranslation } from "~/i18n/useTranslation";
 import type { Route } from "./+types/analysis";
 import type { DateRange } from "react-day-picker";
 
 export function meta({ }: Route.MetaArgs) {
+  const { t } = useTranslation('analysis');
   return [
-    { title: "Space Apps Challenge 2025 - Análise de Dados" },
-    { name: "description", content: "Análise de dados NASA para a localização selecionada" },
+    { title: t('meta.title') },
+    { name: "description", content: t('meta.description') },
   ];
 }
 
@@ -26,8 +28,11 @@ const STORAGE_KEY = 'spaceapps_analysis_data';
 const eventProfiles = EventProfileService.getAllProfiles();
 
 export default function Analysis() {
+  const { t, i18n } = useTranslation('analysis');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  const currentLocale = i18n.language === 'en-US' ? enUS : ptBR;
 
   // Pegar dados da URL ou do localStorage
   const urlLatitude = parseFloat(searchParams.get('lat') || '0');
@@ -100,13 +105,13 @@ export default function Analysis() {
     return (
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-4xl mx-auto text-center pt-20">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Erro: Localização não encontrada</h1>
+          <h1 className="text-2xl font-bold text-destructive mb-4">{t('error.title')}</h1>
           <p className="text-muted-foreground mb-6">
-            Nenhuma coordenada válida foi fornecida. Por favor, retorne à página inicial e selecione uma localização.
+            {t('error.message')}
           </p>
           <Button onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+            {t('error.backButton')}
           </Button>
         </div>
       </div>
@@ -115,12 +120,12 @@ export default function Analysis() {
 
   const handleContinueToResults = () => {
     if (!dateRange?.from || !dateRange?.to) {
-      alert('Por favor, selecione um período de datas para análise');
+      alert(t('alerts.selectDateRange'));
       return;
     }
 
     if (perfilSelecionado === 'customizavel' && !nomeEventoCustomizado.trim()) {
-      alert('Por favor, digite o nome do seu evento personalizado');
+      alert(t('alerts.enterCustomEventName'));
       return;
     }
 
@@ -156,11 +161,11 @@ export default function Analysis() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                Análise de Dados Climáticos
+                {t('header.title')}
               </h1>
             </div>
             <p className="text-base sm:text-lg text-muted-foreground ml-12">
-              Configure seu evento e veja as probabilidades climáticas
+              {t('header.subtitle')}
             </p>
           </div>
 
@@ -168,15 +173,15 @@ export default function Analysis() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 <Calendar className="h-5 w-5 text-primary" />
-                Período do Evento
+                {t('period.title')}
               </CardTitle>
               <CardDescription>
-                Selecione um intervalo de datas para análise de dados históricos
+                {t('period.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label className="text-base">Selecione o período</Label>
+                <Label className="text-base">{t('period.label')}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -190,14 +195,14 @@ export default function Analysis() {
                       {dateRange?.from ? (
                         dateRange.to ? (
                           <>
-                            {format(dateRange.from, "dd 'de' MMMM", { locale: ptBR })} -{" "}
-                            {format(dateRange.to, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                            {format(dateRange.from, "dd 'de' MMMM", { locale: currentLocale })} -{" "}
+                            {format(dateRange.to, "dd 'de' MMMM 'de' yyyy", { locale: currentLocale })}
                           </>
                         ) : (
-                          format(dateRange.from, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                          format(dateRange.from, "dd 'de' MMMM 'de' yyyy", { locale: currentLocale })
                         )
                       ) : (
-                        <span>Selecione um período</span>
+                        <span>{t('period.placeholder')}</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -206,7 +211,7 @@ export default function Analysis() {
                       mode="range"
                       selected={dateRange}
                       onSelect={setDateRange}
-                      locale={ptBR}
+                      locale={currentLocale}
                       disabled={(date) => date < new Date("1900-01-01")}
                     />
                   </PopoverContent>
@@ -219,10 +224,10 @@ export default function Analysis() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MousePointer2 className="h-5 w-5 text-primary" />
-                Tipo de Evento
+                {t('eventType.title')}
               </CardTitle>
               <CardDescription>
-                Selecione o tipo de evento para análise personalizada
+                {t('eventType.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -250,18 +255,18 @@ export default function Analysis() {
               {perfilSelecionado === 'customizavel' && (
                 <div className="mt-4 space-y-2">
                   <Label htmlFor="custom-event-name" className="text-base">
-                    Nome do seu evento
+                    {t('customEvent.label')}
                   </Label>
                   <Input
                     id="custom-event-name"
                     type="text"
-                    placeholder="Ex: Festa de aniversário, Reunião familiar..."
+                    placeholder={t('customEvent.placeholder')}
                     value={nomeEventoCustomizado}
                     onChange={(e) => setNomeEventoCustomizado(e.target.value)}
                     className="h-12 text-base"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Digite o nome do seu evento personalizado para identificação nos resultados
+                    {t('customEvent.hint')}
                   </p>
                 </div>
               )}
@@ -279,7 +284,7 @@ export default function Analysis() {
                 className="flex-1 h-10"
               >
                 <ArrowRight className="h-4 w-4 mr-2" />
-                Ver Probabilidades
+                {t('button.viewProbabilities')}
               </Button>
             </div>
           </div>

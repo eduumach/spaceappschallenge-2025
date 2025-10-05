@@ -1,0 +1,46 @@
+{
+  "praia": {
+    "name": "Praia",
+    "description": "Sol forte, calor intenso, céu limpo"
+  },
+  "churrasco": {
+    "name": "Churrasco",
+    "description": "Sem chuva, calor ou clima agradável"
+  },
+  "pelada": {
+    "name": "Pelada/Futebol",
+    "description": "Brasileiro joga bola em qualquer calor!"
+  },
+  "festa_junina": {
+    "name": "Festa Junina",
+    "description": "Clima de inverno brasileiro, fresquinho à noite"
+  },
+  "samba_pagode": {
+    "name": "Samba/Pagode ao Ar Livre",
+    "description": "Clima quente e animado para curtir"
+  },
+  "carnaval": {
+    "name": "Carnaval de Rua",
+    "description": "Calor ABSURDO de verão brasileiro!"
+  },
+  "volei_praia": {
+    "name": "Vôlei de Praia",
+    "description": "Areia quente, sol a pino"
+  },
+  "pescaria": {
+    "name": "Pescaria",
+    "description": "Manhã tranquila, temperatura moderada"
+  },
+  "piquenique": {
+    "name": "Piquenique no Parque",
+    "description": "Dia agradável sem calor extremo"
+  },
+  "trilha": {
+    "name": "Trilha/Caminhada",
+    "description": "Clima ameno, pode ter chuva leve na mata"
+  },
+  "customizavel": {
+    "name": "Customizável",
+    "description": "Defina seu próprio tipo de evento"
+  }
+}

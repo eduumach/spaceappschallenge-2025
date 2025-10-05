@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "title": "Space Apps Challenge 2025 - Data Analysis",
+    "description": "NASA data analysis for the selected location"
+  },
+  "error": {
+    "title": "Error: Location not found",
+    "message": "No valid coordinates were provided. Please return to the home page and select a location.",
+    "backButton": "Back"
+  },
+  "header": {
+    "title": "Climate Data Analysis",
+    "subtitle": "Configure your event and view weather probabilities"
+  },
+  "period": {
+    "title": "Event Period",
+    "description": "Select a date range for historical data analysis",
+    "label": "Select the period",
+    "placeholder": "Select a period"
+  },
+  "eventType": {
+    "title": "Event Type",
+    "description": "Select the event type for personalized analysis"
+  },
+  "customEvent": {
+    "label": "Your event name",
+    "placeholder": "Ex: Birthday party, Family gathering...",
+    "hint": "Enter your custom event name for identification in results"
+  },
+  "alerts": {
+    "selectDateRange": "Please select a date range for analysis",
+    "enterCustomEventName": "Please enter the name of your custom event"
+  },
+  "button": {
+    "viewProbabilities": "View Probabilities"
+  }
+}

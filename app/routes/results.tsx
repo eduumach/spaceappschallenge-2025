@@ -7,26 +7,31 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, Loader2, TrendingUp, Sparkles, Home, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ptBR, enUS } from "date-fns/locale";
 import { EventProfileService } from "~/lib/services/event-profiles.service";
 import { NASADataFetcherService } from "~/lib/services/nasa-data-fetcher.service";
 import { WeatherAnalysisService } from "~/lib/services/weather-analysis.service";
 import { DateSuggestionsService } from "~/lib/services/date-suggestions.service";
 import { ProbabilityFormatterService } from "~/lib/services/probability-formatter.service";
+import { useTranslation } from "~/i18n/useTranslation";
 import type { DayAnalysis } from "~/lib/types/weather.types";
 import type { Route } from "./+types/results";
 
 export function meta({}: Route.MetaArgs) {
+  const { t } = useTranslation('results');
   return [
-    { title: "Resultados - Vai Chover na Minha Parada?" },
-    { name: "description", content: "Análise de probabilidades climáticas baseada em dados históricos da NASA" },
+    { title: t('meta.title') },
+    { name: "description", content: t('meta.description') },
   ];
 }
 
 
 export default function Results() {
+  const { t, i18n } = useTranslation('results');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const currentLocale = i18n.language === 'en-US' ? enUS : ptBR;
 
   const latitude = parseFloat(searchParams.get('lat') || '0');
   const longitude = parseFloat(searchParams.get('lng') || '0');
@@ -48,13 +53,13 @@ export default function Results() {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="max-w-4xl mx-auto text-center pt-20 p-6">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Erro: Perfil de evento inválido</h1>
+          <h1 className="text-2xl font-bold text-destructive mb-4">{t('errors.invalidProfile.title')}</h1>
           <p className="text-muted-foreground mb-6">
-            O tipo de evento selecionado não foi encontrado.
+            {t('errors.invalidProfile.message')}
           </p>
           <Button onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+            {t('errors.invalidProfile.backButton')}
           </Button>
         </div>
       </div>
@@ -145,13 +150,13 @@ export default function Results() {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="max-w-4xl mx-auto text-center pt-20 p-6">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Erro: Dados insuficientes</h1>
+          <h1 className="text-2xl font-bold text-destructive mb-4">{t('errors.insufficientData.title')}</h1>
           <p className="text-muted-foreground mb-6">
-            Informações necessárias não foram fornecidas. Por favor, retorne e complete todas as etapas.
+            {t('errors.insufficientData.message')}
           </p>
           <Button onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+            {t('errors.insufficientData.backButton')}
           </Button>
         </div>
       </div>
@@ -170,11 +175,11 @@ export default function Results() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Resultados da Análise
+                {t('header.title')}
               </h1>
             </div>
             <p className="text-base sm:text-lg text-muted-foreground ml-12">
-              Probabilidades climáticas baseadas em 20 anos de dados NASA
+              {t('header.subtitle')}
             </p>
           </div>
 
@@ -183,7 +188,7 @@ export default function Results() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                Informações do Evento
+                {t('eventInfo.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -191,14 +196,14 @@ export default function Results() {
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                     <Cloud className="h-4 w-4" />
-                    Tipo de Evento
+                    {t('eventInfo.eventType')}
                   </p>
                   <p className="font-semibold text-lg">{perfil.name}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    Período
+                    {t('eventInfo.period')}
                   </p>
                   <p className="font-semibold text-sm">
                     {format(new Date(dataInicio), "dd/MM")} - {format(new Date(dataFim), "dd/MM/yyyy")}
@@ -207,13 +212,13 @@ export default function Results() {
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    Coordenadas
+                    {t('eventInfo.coordinates')}
                   </p>
                   <p className="font-mono text-xs sm:text-sm">{latitude.toFixed(4)}, {longitude.toFixed(4)}</p>
                 </div>
                 {locationName && (
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Local</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t('eventInfo.location')}</p>
                     <p className="font-semibold truncate">{locationName}</p>
                   </div>
                 )}
@@ -227,8 +232,8 @@ export default function Results() {
               <CardContent className="p-12">
                 <div className="flex flex-col items-center justify-center space-y-4">
                   <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                  <p className="text-lg font-medium">Analisando 20 anos de dados históricos da NASA...</p>
-                  <p className="text-sm text-muted-foreground">Isso pode levar alguns segundos</p>
+                  <p className="text-lg font-medium">{t('loading.analyzing')}</p>
+                  <p className="text-sm text-muted-foreground">{t('loading.wait')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -240,12 +245,12 @@ export default function Results() {
               <CardContent className="p-8">
                 <div className="text-center space-y-4">
                   <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
-                  <h3 className="text-xl font-bold text-destructive">Erro ao buscar dados</h3>
+                  <h3 className="text-xl font-bold text-destructive">{t('errors.fetchError.title')}</h3>
                   <p className="text-muted-foreground">
-                    Não foi possível obter os dados climáticos da NASA. Por favor, tente novamente.
+                    {t('errors.fetchError.message')}
                   </p>
                   <Button onClick={buscarDadosHistoricos}>
-                    Tentar Novamente
+                    {t('errors.fetchError.retryButton')}
                   </Button>
                 </div>
               </CardContent>
@@ -257,7 +262,7 @@ export default function Results() {
             <Card className="border-2 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-center text-sm font-medium text-muted-foreground">
-                  Melhor Dia do Período
+                  {t('bestDay.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-6">
@@ -269,10 +274,10 @@ export default function Results() {
                     {melhorDia.probability.toFixed(1)}%
                   </div>
                   <div className="text-base sm:text-lg text-muted-foreground">
-                    Probabilidade de Clima Ideal
+                    {t('bestDay.probability')}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Baseado em {melhorDia.totalYears} anos de dados ({melhorDia.idealYears} anos ideais)
+                    {t('bestDay.basedOn', { years: melhorDia.totalYears, idealYears: melhorDia.idealYears })}
                   </p>
                 </div>
               </CardContent>
@@ -285,10 +290,10 @@ export default function Results() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   <Sparkles className="h-5 w-5 text-primary" />
-                  Datas Alternativas Sugeridas
+                  {t('alternatives.title')}
                 </CardTitle>
                 <CardDescription>
-                  Datas próximas (±30 dias) com maior probabilidade de clima ideal
+                  {t('alternatives.description')}
                 </CardDescription>
               </CardHeader>
             <CardContent>
@@ -310,7 +315,7 @@ export default function Results() {
                           <div>
                             <div className="font-bold text-lg">{dia.dateStr}</div>
                             <div className="text-xs text-muted-foreground">
-                              {textoProximidade} da data selecionada
+                              {t('alternatives.proximity', { text: textoProximidade })}
                             </div>
                           </div>
                         </div>
@@ -319,7 +324,7 @@ export default function Results() {
                             {dia.probability.toFixed(1)}%
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {dia.idealYears} de {dia.totalYears} anos
+                            {t('alternatives.yearsData', { idealYears: dia.idealYears, totalYears: dia.totalYears })}
                           </div>
                         </div>
                       </div>
@@ -337,10 +342,10 @@ export default function Results() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  Tendência Climática
+                  {t('trend.title')}
                 </CardTitle>
                 <CardDescription>
-                  Comparação entre dados recentes e histórico completo
+                  {t('trend.description')}
                 </CardDescription>
               </CardHeader>
             <CardContent>
@@ -349,13 +354,13 @@ export default function Results() {
                 <div className="p-6 rounded-lg border-2 border-border bg-muted/50">
                   <div className="text-center space-y-3">
                     <div className="text-sm font-medium text-muted-foreground">
-                      Últimos 10 Anos
+                      {t('trend.recent10Years')}
                     </div>
                     <div className="text-4xl font-bold text-primary">
                       {melhorDia.recentProbability.toFixed(1)}%
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {melhorDia.idealRecentYears} de {melhorDia.totalRecentYears} anos
+                      {t('trend.yearsCount', { idealYears: melhorDia.idealRecentYears, totalYears: melhorDia.totalRecentYears })}
                     </div>
                   </div>
                 </div>
@@ -364,13 +369,13 @@ export default function Results() {
                 <div className="p-6 rounded-lg border-2 border-border bg-muted/50">
                   <div className="text-center space-y-3">
                     <div className="text-sm font-medium text-muted-foreground">
-                      Histórico Completo (20 anos)
+                      {t('trend.fullHistory')}
                     </div>
                     <div className="text-4xl font-bold">
                       {melhorDia.probability.toFixed(1)}%
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {melhorDia.idealYears} de {melhorDia.totalYears} anos
+                      {t('trend.yearsCount', { idealYears: melhorDia.idealYears, totalYears: melhorDia.totalYears })}
                     </div>
                   </div>
                 </div>
@@ -385,10 +390,10 @@ export default function Results() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   <Calendar className="h-5 w-5 text-primary" />
-                  Todos os Dias do Período
+                  {t('comparison.title')}
                 </CardTitle>
                 <CardDescription>
-                  Probabilidade de clima ideal para cada dia
+                  {t('comparison.description')}
                 </CardDescription>
               </CardHeader>
             <CardContent>
@@ -408,7 +413,7 @@ export default function Results() {
                           <div className="font-semibold">{dia.dateStr}</div>
                           {dia === melhorDia && (
                             <Badge variant="outline" className="mt-1 text-xs">
-                              Melhor
+                              {t('comparison.bestBadge')}
                             </Badge>
                           )}
                         </div>
@@ -418,7 +423,7 @@ export default function Results() {
                           {dia.probability.toFixed(1)}%
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {dia.idealYears}/{dia.totalYears} anos
+                          {t('comparison.yearsFormat', { idealYears: dia.idealYears, totalYears: dia.totalYears })}
                         </div>
                       </div>
                     </div>
@@ -435,9 +440,9 @@ export default function Results() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <CheckCircle className="h-5 w-5 text-primary" />
-                  Exemplos de Anos Ideais ({melhorDia.dateStr})
+                  {t('idealYears.title', { date: melhorDia.dateStr })}
                 </CardTitle>
-                <CardDescription>Alguns anos com clima ideal nesta data</CardDescription>
+                <CardDescription>{t('idealYears.description')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
@@ -464,12 +469,12 @@ export default function Results() {
             <div className="max-w-6xl mx-auto flex gap-2">
               <Button variant="outline" className="flex-1 h-10" onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Editar Análise
+                {t('buttons.editAnalysis')}
               </Button>
               <Link to="/" className="flex-1">
                 <Button className="w-full h-10">
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Nova Análise
+                  {t('buttons.newAnalysis')}
                 </Button>
               </Link>
             </div>

@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "title": "Resultados - Vai Chover na Minha Parada?",
+    "description": "Análise de probabilidades climáticas baseada em dados históricos da NASA"
+  },
+  "errors": {
+    "invalidProfile": {
+      "title": "Erro: Perfil de evento inválido",
+      "message": "O tipo de evento selecionado não foi encontrado.",
+      "backButton": "Voltar"
+    },
+    "insufficientData": {
+      "title": "Erro: Dados insuficientes",
+      "message": "Informações necessárias não foram fornecidas. Por favor, retorne e complete todas as etapas.",
+      "backButton": "Voltar"
+    },
+    "fetchError": {
+      "title": "Erro ao buscar dados",
+      "message": "Não foi possível obter os dados climáticos da NASA. Por favor, tente novamente.",
+      "retryButton": "Tentar Novamente"
+    }
+  },
+  "header": {
+    "title": "Resultados da Análise",
+    "subtitle": "Probabilidades climáticas baseadas em 20 anos de dados NASA"
+  },
+  "eventInfo": {
+    "title": "Informações do Evento",
+    "eventType": "Tipo de Evento",
+    "period": "Período",
+    "coordinates": "Coordenadas",
+    "location": "Local"
+  },
+  "loading": {
+    "analyzing": "Analisando 20 anos de dados históricos da NASA...",
+    "wait": "Isso pode levar alguns segundos"
+  },
+  "bestDay": {
+    "title": "Melhor Dia do Período",
+    "probability": "Probabilidade de Clima Ideal",
+    "basedOn": "Baseado em {{years}} anos de dados ({{idealYears}} anos ideais)"
+  },
+  "alternatives": {
+    "title": "Datas Alternativas Sugeridas",
+    "description": "Datas próximas (±30 dias) com maior probabilidade de clima ideal",
+    "proximity": "{{text}} da data selecionada",
+    "yearsData": "{{idealYears}} de {{totalYears}} anos"
+  },
+  "trend": {
+    "title": "Tendência Climática",
+    "description": "Comparação entre dados recentes e histórico completo",
+    "recent10Years": "Últimos 10 Anos",
+    "fullHistory": "Histórico Completo (20 anos)",
+    "yearsCount": "{{idealYears}} de {{totalYears}} anos"
+  },
+  "comparison": {
+    "title": "Todos os Dias do Período",
+    "description": "Probabilidade de clima ideal para cada dia",
+    "bestBadge": "Melhor",
+    "yearsFormat": "{{idealYears}}/{{totalYears}} anos"
+  },
+  "idealYears": {
+    "title": "Exemplos de Anos Ideais ({{date}})",
+    "description": "Alguns anos com clima ideal nesta data"
+  },
+  "buttons": {
+    "editAnalysis": "Editar Análise",
+    "newAnalysis": "Nova Análise"
+  }
+}

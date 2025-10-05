@@ -1,10 +1,18 @@
 import type { EventProfile } from "~/lib/types/weather.types";
+import i18n from "~/i18n/config";
+
+// Get translated profile data
+const getTranslatedProfile = (key: string): { name: string; description: string } => {
+  return {
+    name: i18n.t(`${key}.name`, { ns: 'eventProfiles' }),
+    description: i18n.t(`${key}.description`, { ns: 'eventProfiles' })
+  };
+};
 
 // Centralized event profiles with climate criteria
-export const EVENT_PROFILES: Record<string, EventProfile> = {
+const createEventProfiles = (): Record<string, EventProfile> => ({
   praia: {
-    name: 'Praia',
-    description: 'Sol forte, calor intenso, céu limpo',
+    ...getTranslatedProfile('praia'),
     criteria: {
       temp_min_ideal: 28,
       temp_max_ideal: 42,
@@ -14,8 +22,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   churrasco: {
-    name: 'Churrasco',
-    description: 'Sem chuva, calor ou clima agradável',
+    ...getTranslatedProfile('churrasco'),
     criteria: {
       temp_min_ideal: 20,
       temp_max_ideal: 38,
@@ -24,8 +31,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   pelada: {
-    name: 'Pelada/Futebol',
-    description: 'Brasileiro joga bola em qualquer calor!',
+    ...getTranslatedProfile('pelada'),
     criteria: {
       temp_min_ideal: 20,
       temp_max_ideal: 38,
@@ -34,8 +40,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   festa_junina: {
-    name: 'Festa Junina',
-    description: 'Clima de inverno brasileiro, fresquinho à noite',
+    ...getTranslatedProfile('festa_junina'),
     criteria: {
       temp_min_ideal: 16,
       temp_max_ideal: 28,
@@ -46,8 +51,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   samba_pagode: {
-    name: 'Samba/Pagode ao Ar Livre',
-    description: 'Clima quente e animado para curtir',
+    ...getTranslatedProfile('samba_pagode'),
     criteria: {
       temp_min_ideal: 24,
       temp_max_ideal: 36,
@@ -57,8 +61,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   carnaval: {
-    name: 'Carnaval de Rua',
-    description: 'Calor ABSURDO de verão brasileiro!',
+    ...getTranslatedProfile('carnaval'),
     criteria: {
       temp_min_ideal: 30,
       temp_max_ideal: 42,
@@ -69,8 +72,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   volei_praia: {
-    name: 'Vôlei de Praia',
-    description: 'Areia quente, sol a pino',
+    ...getTranslatedProfile('volei_praia'),
     criteria: {
       temp_min_ideal: 28,
       temp_max_ideal: 40,
@@ -80,8 +82,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   pescaria: {
-    name: 'Pescaria',
-    description: 'Manhã tranquila, temperatura moderada',
+    ...getTranslatedProfile('pescaria'),
     criteria: {
       temp_min_ideal: 20,
       temp_max_ideal: 32,
@@ -90,8 +91,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   piquenique: {
-    name: 'Piquenique no Parque',
-    description: 'Dia agradável sem calor extremo',
+    ...getTranslatedProfile('piquenique'),
     criteria: {
       temp_min_ideal: 22,
       temp_max_ideal: 30,
@@ -102,8 +102,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   trilha: {
-    name: 'Trilha/Caminhada',
-    description: 'Clima ameno, pode ter chuva leve na mata',
+    ...getTranslatedProfile('trilha'),
     criteria: {
       temp_min_ideal: 18,
       temp_max_ideal: 28,
@@ -114,8 +113,7 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
     }
   },
   customizavel: {
-    name: 'Customizável',
-    description: 'Defina seu próprio tipo de evento',
+    ...getTranslatedProfile('customizavel'),
     criteria: {
       temp_min_ideal: 20,
       temp_max_ideal: 30,
@@ -125,7 +123,15 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
       humidity_max: 70
     }
   }
-};
+});
+
+export const EVENT_PROFILES: Record<string, EventProfile> = createEventProfiles();
+
+// Listen to language changes and update profiles
+i18n.on('languageChanged', () => {
+  const updatedProfiles = createEventProfiles();
+  Object.assign(EVENT_PROFILES, updatedProfiles);
+});
 
 export class EventProfileService {
   static getProfile(key: string): EventProfile | undefined {
