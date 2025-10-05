@@ -4,6 +4,29 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-lea
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+// Hook para detectar o tema
+function useTheme() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
+
 // Fix para os ícones padrão do Leaflet
 if (typeof window !== "undefined") {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -48,7 +71,27 @@ function LocationMarker({ onLocationSelect, searchLocation }: {
   return position === null ? null : <Marker position={position} />;
 }
 
+function DynamicTileLayer({ isDark }: { isDark: boolean }) {
+  return (
+    <TileLayer
+      key={isDark ? 'dark' : 'light'}
+      attribution={
+        isDark
+          ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }
+      url={
+        isDark
+          ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+          : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      }
+    />
+  );
+}
+
 export function MapPickerClient({ onLocationSelect, initialPosition = [-15.7801, -47.9292], searchLocation }: MapPickerProps) {
+  const isDark = useTheme();
+
   return (
     <MapContainer
       center={initialPosition}
@@ -56,10 +99,7 @@ export function MapPickerClient({ onLocationSelect, initialPosition = [-15.7801,
       className="w-full h-full rounded-lg"
       style={{ height: "100%", minHeight: "500px" }}
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <DynamicTileLayer isDark={isDark} />
       <LocationMarker onLocationSelect={onLocationSelect} searchLocation={searchLocation} />
     </MapContainer>
   );
