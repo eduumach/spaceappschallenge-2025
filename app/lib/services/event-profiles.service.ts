@@ -1,13 +1,4 @@
 import type { EventCriteria, EventProfile } from "~/lib/types/weather.types";
-import i18n from "~/i18n/config";
-
-// Get translated profile data
-const getTranslatedProfile = (key: string): { name: string; description: string } => {
-  return {
-    name: i18n.t(`${key}.name`, { ns: 'eventProfiles' }),
-    description: i18n.t(`${key}.description`, { ns: 'eventProfiles' })
-  };
-};
 
 const eventPresets: Record<string, EventCriteria> = {
   praia: {
@@ -92,34 +83,23 @@ const eventPresets: Record<string, EventCriteria> = {
   custom: {},
 }
 
-// Centralized event profiles with climate criteria
-const createEventProfiles : () => Record<string, EventProfile> = () => {
-  const ret: Record<string, EventProfile> = {}
-  for (const key of Object.keys(eventPresets)) {
-    const criteria = eventPresets[key]
-    console.log(criteria)
-    ret[key] = {
-      name: "", // vai ser definido no front mesmo
-      description: "",
-      criteria
-    }
-  }
-  // console.log(ret, eventPresets)
-  return ret
-}
 
-export const EVENT_PROFILES: Record<string, EventProfile> = createEventProfiles();
+export const EVENT_PROFILES: Record<string, EventProfile> = {};
+for (const key of Object.keys(eventPresets)) {
+  const criteria = eventPresets[key]
+  console.log(criteria)
+  EVENT_PROFILES[key] = {
+    name: "", // vai ser definido no front mesmo
+    description: "",
+    criteria
+  }
+}
+  
 
 // Deriva todas as chaves possíveis de criteria dos perfis
 export const CRITERIA_KEYS = Array.from(new Set(
-  Object.values(createEventProfiles()).flatMap(profile => Object.keys(profile.criteria))
+  Object.values(EVENT_PROFILES).flatMap(profile => Object.keys(profile.criteria))
 ));
-
-// Listen to language changes and update profiles
-i18n.on('languageChanged', () => {
-  const updatedProfiles = createEventProfiles();
-  Object.assign(EVENT_PROFILES, updatedProfiles);
-});
 
 export class EventProfileService {
   static getProfile(key: string): EventProfile | undefined {
