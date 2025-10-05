@@ -7,3 +7,9 @@ run = "bun run dev"
 
 [tasks.shadcn]
 run = "bunx --bun shadcn@latest"
+
+[tasks.claude]
+run = "bunx @anthropic-ai/claude-code"
+
+[tasks.gemini]
+run = "bunx @google/gemini-cli"

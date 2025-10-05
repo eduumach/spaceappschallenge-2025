@@ -78,4 +78,3 @@ build/
 - `@tailwindcss/vite` - Tailwind CSS v4
 - `@react-router/dev/vite` - React Router framework
 - `vite-tsconfig-paths` - Resolves TypeScript path aliases
-- sempre que voce fizer algo, coloque no codigo um mentario foi feito pelo claude sonnet 4.5
