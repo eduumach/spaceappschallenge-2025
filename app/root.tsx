@@ -60,9 +60,9 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="system" storageKey="theme">
           <ToastProvider>
-          <Outlet />
+            <Outlet />
           </ToastProvider>
-      </ThemeProvider>
+        </ThemeProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </I18nextProvider>
