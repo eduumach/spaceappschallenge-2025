@@ -209,30 +209,36 @@ Dashboard completo com todas as métricas principais:
 
 ## Como Funciona na Prática
 
-### Exemplo de Uso Completo
+**Cenário**: Planejamento de um churrasco em Uberlândia no dia 15 de agosto de 2026 às 14:00
 
-**Cenário**: Churrasco em Uberlândia no dia 15 de agosto de 2026 as 14:00
+### **Selecione a localização no mapa**
 
-1. Passo 1: Seleciona Uberlândia no mapa
+Clique em Uberlândia ou insira as coordenadas manualmente
 ![Seleção de Localização](./assets/screen/map-selector.png)
 
-2. Passo 2: Escolhe 15 de agosto de 2026 às 14:00
+### **Escolha a data e horário do evento**
+
+Defina 15 de agosto de 2026 às 14:00
 ![Seleção de Data e Hora](./assets/screen/date-time-selector.png)
 
-3. Passo 3: Seleciona perfil "Churrasco"
+### **Selecione o perfil de evento**
+Escolha "Churrasco" ou personalize os critérios climáticos
 ![Seleção de Perfil de Evento](./assets/screen/event-profile-selector.png)
 
-4. Passo 4: Visualiza resultados detalhados
+### **Visualize os resultados da análise**
+Confira a probabilidade e os dados históricos detalhados
 ![Visualização de Resultados](./assets/screen/results-overview.png)
 
-5. Passo 5: Visualizar a tendências Climáticas
+### **Analise as tendências climáticas**
+Compare dados das últimas duas décadas
 ![Análise de Tendências](./assets/screen/climate-trend.png)
 
-6. Passo 6: Examina datas alternativas
-Como o exemplo de 15 de agosto foi 100% peguei o dia 24 de outubro de 2025 que deu 35%. E tem outras alternativas proximas.
+### **Explore datas alternativas**
+Neste exemplo, 15 de agosto apresentou 100% de probabilidade ideal. Para demonstrar a funcionalidade de alternativas, testamos também 24 de outubro de 2025 (35% de probabilidade), que mostra sugestões de datas próximas com melhores condições.
 ![Datas Alternativas](./assets/screen/alternative-dates.png)
 
-7. Passo 7: Exportar dados
+### **Exporte os dados para análise**
+Baixe os resultados em CSV ou JSON
 ![Exportação de Dados](./assets/screen/data-export.png)
 ---
 
