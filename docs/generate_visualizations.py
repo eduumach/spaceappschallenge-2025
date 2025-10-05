@@ -285,11 +285,21 @@ def plot_3_multi_parameter_dashboard(df):
 
     # Temperature
     ax1 = axes[0, 0]
-    ax1.fill_between(df['year'], df['temp_min'], df['temp_max'], alpha=0.3, color='orange')
-    ax1.plot(df['year'], df['temp_max'], 'o-', color='red', label='Max')
-    ax1.plot(df['year'], df['temp_min'], 's-', color='blue', label='Min')
+    is_hourly = EVENT_DATE['hour'] is not None
+
+    if is_hourly:
+        # For hourly data, show only one temperature line
+        ax1.plot(df['year'], df['temp_max'], 'o-', color='#e74c3c',
+                linewidth=2, markersize=6, label=f'Temperature at {EVENT_DATE["hour"]:02d}:00')
+        ax1.set_title('Temperature', fontweight='bold')
+    else:
+        # For daily data, show min and max
+        ax1.fill_between(df['year'], df['temp_min'], df['temp_max'], alpha=0.3, color='orange')
+        ax1.plot(df['year'], df['temp_max'], 'o-', color='red', label='Max')
+        ax1.plot(df['year'], df['temp_min'], 's-', color='blue', label='Min')
+        ax1.set_title('Temperature Range', fontweight='bold')
+
     ax1.set_ylabel('Temperature (°C)', fontweight='bold')
-    ax1.set_title('Temperature Range', fontweight='bold')
     ax1.legend()
     ax1.grid(True, alpha=0.3)
 
