@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "title": "Space Apps Challenge 2025 - Seleção de Localização",
+    "description": "Selecione uma localização no mapa interativo para o Space Apps Challenge 2025"
+  },
+  "title": "Seleção de Localização",
+  "subtitle": "Use todos os métodos para selecionar um ponto de interesse",
+  "searchByName": {
+    "title": "Busca por Nome",
+    "description": "Digite o nome de uma cidade ou endereço",
+    "placeholder": "Digite um endereço ou local...",
+    "button": "Buscar",
+    "searching": "Buscando...",
+    "active": "Ativo",
+    "notFound": "Localização não encontrada. Tente com um nome mais específico.",
+    "error": "Erro ao buscar localização. Tente novamente."
+  },
+  "coordinates": {
+    "title": "Coordenadas",
+    "description": "Insira latitude e longitude diretamente",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "latitudePlaceholder": "-23.5505",
+    "longitudePlaceholder": "-46.6333",
+    "latitudeRange": "Entre -90 e 90",
+    "longitudeRange": "Entre -180 e 180",
+    "button": "Definir",
+    "active": "Ativo",
+    "invalidCoordinates": "Por favor, insira coordenadas válidas",
+    "invalidLatitude": "Latitude deve estar entre -90 e 90",
+    "invalidLongitude": "Longitude deve estar entre -180 e 180"
+  },
+  "map": {
+    "title": "Mapa Interativo",
+    "description": "Clique no mapa para selecionar",
+    "active": "Ativo"
+  },
+  "selectedLocation": {
+    "title": "Localização Selecionada",
+    "success": "Localização definida com sucesso",
+    "methodMap": "Mapa",
+    "methodName": "Nome",
+    "methodCoordinates": "Coordenadas",
+    "continueButton": "Ir para os Dados",
+    "clearButton": "Limpar Seleção"
+  }
+}

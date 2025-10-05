@@ -8,6 +8,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useToast } from "~/components/toast-provider";
+import { useTranslation } from "~/i18n";
 
 import { MapPin, Navigation, Search, Trash2, Loader2, Globe, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Route } from "./+types/home";
@@ -22,6 +23,7 @@ export function meta({}: Route.MetaArgs) {
 export default function Home() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useTranslation('home');
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationName, setLocationName] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -70,11 +72,11 @@ export default function Home() {
         setLongitude(lng.toString());
         setActiveMethod('name');
       } else {
-        showToast('Localização não encontrada. Tente com um nome mais específico.', 'warning');
+        showToast(t('searchByName.notFound'), 'warning');
       }
     } catch (error) {
       console.error('Erro ao buscar localização:', error);
-      showToast('Erro ao buscar localização. Tente novamente.', 'destructive');
+      showToast(t('searchByName.error'), 'destructive');
     } finally {
       setIsSearching(false);
     }
@@ -89,22 +91,22 @@ export default function Home() {
   const handleCoordinateSearch = () => {
     const lat = parseFloat(latitude);
     const lng = parseFloat(longitude);
-    
+
     if (isNaN(lat) || isNaN(lng)) {
-      showToast('Por favor, insira coordenadas válidas', 'warning');
+      showToast(t('coordinates.invalidCoordinates'), 'warning');
       return;
     }
-    
+
     if (lat < -90 || lat > 90) {
-      showToast('Latitude deve estar entre -90 e 90', 'warning');
+      showToast(t('coordinates.invalidLatitude'), 'warning');
       return;
     }
-    
+
     if (lng < -180 || lng > 180) {
-      showToast('Longitude deve estar entre -180 e 180', 'warning');
+      showToast(t('coordinates.invalidLongitude'), 'warning');
       return;
     }
-    
+
     setSelectedLocation({ lat, lng });
     setActiveMethod('coordinates');
   };
@@ -138,9 +140,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10">
           <div className="text-center space-y-4">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-neutral-700 to-neutral-500 dark:from-neutral-300 dark:to-neutral-100 bg-clip-text text-transparent">
-              Seleção de Localização
+              {t('title')}
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground px-4">Use todos os métodos para selecionar um ponto de interesse</p>
+            <p className="text-sm sm:text-base text-muted-foreground px-4">{t('subtitle')}</p>
           </div>
 
         <div className="space-y-6">
@@ -149,22 +151,22 @@ export default function Home() {
             <CardHeader className="border-b p-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Search className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-                Busca por Nome
-                {activeMethod === 'name' && <Badge variant="default" className="ml-2">Ativo</Badge>}
+                {t('searchByName.title')}
+                {activeMethod === 'name' && <Badge variant="default" className="ml-2">{t('searchByName.active')}</Badge>}
               </CardTitle>
-              <CardDescription className="text-sm">Digite o nome de uma cidade ou endereço</CardDescription>
+              <CardDescription className="text-sm">{t('searchByName.description')}</CardDescription>
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-3">
                 <Input
-                  placeholder="Digite um endereço ou local..."
+                  placeholder={t('searchByName.placeholder')}
                   value={locationName}
                   onChange={(e) => setLocationName(e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="border-2"
                 />
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   onClick={handleSearch}
                   disabled={isSearching || !locationName.trim()}
                 >
@@ -173,7 +175,7 @@ export default function Home() {
                   ) : (
                     <Search className="h-4 w-4 mr-2" />
                   )}
-                  {isSearching ? "Buscando..." : "Buscar"}
+                  {isSearching ? t('searchByName.searching') : t('searchByName.button')}
                 </Button>
               </div>
             </CardContent>
@@ -183,18 +185,18 @@ export default function Home() {
             <CardHeader className="border-b p-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Globe className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-                Coordenadas
-                {activeMethod === 'coordinates' && <Badge variant="default" className="ml-2">Ativo</Badge>}
+                {t('coordinates.title')}
+                {activeMethod === 'coordinates' && <Badge variant="default" className="ml-2">{t('coordinates.active')}</Badge>}
               </CardTitle>
-              <CardDescription className="text-sm">Insira latitude e longitude diretamente</CardDescription>
+              <CardDescription className="text-sm">{t('coordinates.description')}</CardDescription>
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Latitude</label>
+                    <label className="text-sm font-medium mb-1 block">{t('coordinates.latitude')}</label>
                     <Input
-                      placeholder="-23.5505"
+                      placeholder={t('coordinates.latitudePlaceholder')}
                       value={latitude}
                       onChange={(e) => setLatitude(e.target.value)}
                       onKeyPress={handleCoordinateKeyPress}
@@ -202,12 +204,12 @@ export default function Home() {
                       type="number"
                       step="any"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">Entre -90 e 90</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('coordinates.latitudeRange')}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Longitude</label>
+                    <label className="text-sm font-medium mb-1 block">{t('coordinates.longitude')}</label>
                     <Input
-                      placeholder="-46.6333"
+                      placeholder={t('coordinates.longitudePlaceholder')}
                       value={longitude}
                       onChange={(e) => setLongitude(e.target.value)}
                       onKeyPress={handleCoordinateKeyPress}
@@ -215,16 +217,16 @@ export default function Home() {
                       type="number"
                       step="any"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">Entre -180 e 180</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('coordinates.longitudeRange')}</p>
                   </div>
                 </div>
-                <Button 
+                <Button
                   className="w-full"
                   onClick={handleCoordinateSearch}
                   disabled={!latitude.trim() || !longitude.trim()}
                 >
                   <Globe className="h-4 w-4 mr-2" />
-                  Definir
+                  {t('coordinates.button')}
                 </Button>
               </div>
             </CardContent>
@@ -234,10 +236,10 @@ export default function Home() {
             <CardHeader className="border-b p-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MapPin className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-                Mapa Interativo
-                {activeMethod === 'map' && <Badge variant="default" className="ml-2">Ativo</Badge>}
+                {t('map.title')}
+                {activeMethod === 'map' && <Badge variant="default" className="ml-2">{t('map.active')}</Badge>}
               </CardTitle>
-              <CardDescription className="text-sm">Clique no mapa para selecionar</CardDescription>
+              <CardDescription className="text-sm">{t('map.description')}</CardDescription>
             </CardHeader>
             <CardContent className="px-4 py-0">
               <div className="h-[400px] sm:h-[500px] lg:h-[600px]">
@@ -272,20 +274,20 @@ export default function Home() {
               <div className="flex-1 flex flex-col">
                 <div className="p-6 border-b">
                   <h2 className="text-lg font-semibold text-center">
-                    Localização Selecionada
+                    {t('selectedLocation.title')}
                   </h2>
                   <div className="flex justify-center mt-2">
                     <Badge variant="secondary">
-                      {activeMethod === 'map' ? 'Mapa' : activeMethod === 'name' ? 'Nome' : 'Coordenadas'}
+                      {activeMethod === 'map' ? t('selectedLocation.methodMap') : activeMethod === 'name' ? t('selectedLocation.methodName') : t('selectedLocation.methodCoordinates')}
                     </Badge>
                   </div>
                 </div>
-                
+
                 <div className="flex-1 flex flex-col items-center justify-center p-6">
                   <div className="text-center space-y-4">
                     <Navigation className="h-12 w-12 mx-auto text-green-600 dark:text-green-400" />
                     <p className="text-sm text-muted-foreground">
-                      Localização definida com sucesso
+                      {t('selectedLocation.success')}
                     </p>
                   </div>
                 </div>
@@ -297,7 +299,7 @@ export default function Home() {
                     size="lg"
                   >
                     <ArrowRight className="h-4 w-4 mr-2" />
-                    Ir para os Dados
+                    {t('selectedLocation.continueButton')}
                   </Button>
                   <Button
                     variant="outline"
@@ -306,7 +308,7 @@ export default function Home() {
                     size="sm"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Limpar Seleção
+                    {t('selectedLocation.clearButton')}
                   </Button>
                 </div>
               </div>

@@ -4,6 +4,8 @@ import { initReactI18next } from 'react-i18next';
 // Importar as traduções
 import enCommon from './locales/en-US/common.json';
 import ptCommon from './locales/pt-BR/common.json';
+import enHome from './locales/en-US/home.json';
+import ptHome from './locales/pt-BR/home.json';
 
 // Detectar idioma do navegador ou usar o padrão
 const browserLanguage = typeof window !== 'undefined'
@@ -26,9 +28,11 @@ i18n
     resources: {
       'en-US': {
         common: enCommon,
+        home: enHome,
       },
       'pt-BR': {
         common: ptCommon,
+        home: ptHome,
       },
     },
     lng: defaultLanguage,
