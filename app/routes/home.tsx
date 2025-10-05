@@ -16,9 +16,10 @@ import type { Route } from "./+types/home";
 const STORAGE_KEY = 'spaceapps_selected_location';
 
 export function meta({}: Route.MetaArgs) {
+  const { t } = useTranslation('home');
   return [
-    { title: "Space Apps Challenge 2025 - Seleção de Localização" },
-    { name: "description", content: "Selecione uma localização no mapa interativo para o Space Apps Challenge 2025" },
+    { title: t("meta.title")},
+    { name: "description", content: t("meta.description") },
   ];
 }
 

@@ -5,5 +5,16 @@
   "language": "Language",
   "changeLanguage": "Change language",
   "english": "English",
-  "portuguese": "Portuguese"
+  "portuguese": "Portuguese",
+  "theme": {
+    "toggle": {
+      "to_light": "Switch to light theme",
+      "to_dark": "Switch to dark theme",
+      "to_system": "Switch to system theme"
+    }
+  },
+  "oops": "Oops!",
+  "unexpectedError": "An unexpected error occurred.",
+  "pageNotFound": "The requested page could not be found.",
+  "error": "Error"
 }
