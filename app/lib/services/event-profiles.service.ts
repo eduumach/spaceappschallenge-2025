@@ -4,7 +4,6 @@ import type { EventProfile } from "~/lib/types/weather.types";
 export const EVENT_PROFILES: Record<string, EventProfile> = {
   praia: {
     name: 'Praia',
-    emoji: '🏖️',
     description: 'Sol forte, calor intenso, céu limpo',
     criteria: {
       temp_min_ideal: 28,
@@ -16,7 +15,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   churrasco: {
     name: 'Churrasco',
-    emoji: '🍖',
     description: 'Sem chuva, calor ou clima agradável',
     criteria: {
       temp_min_ideal: 20,
@@ -27,7 +25,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   pelada: {
     name: 'Pelada/Futebol',
-    emoji: '⚽',
     description: 'Brasileiro joga bola em qualquer calor!',
     criteria: {
       temp_min_ideal: 20,
@@ -38,7 +35,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   festa_junina: {
     name: 'Festa Junina',
-    emoji: '🌽',
     description: 'Clima de inverno brasileiro, fresquinho à noite',
     criteria: {
       temp_min_ideal: 16,
@@ -51,7 +47,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   samba_pagode: {
     name: 'Samba/Pagode ao Ar Livre',
-    emoji: '🎵',
     description: 'Clima quente e animado para curtir',
     criteria: {
       temp_min_ideal: 24,
@@ -63,7 +58,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   carnaval: {
     name: 'Carnaval de Rua',
-    emoji: '🎉',
     description: 'Calor ABSURDO de verão brasileiro!',
     criteria: {
       temp_min_ideal: 30,
@@ -76,7 +70,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   volei_praia: {
     name: 'Vôlei de Praia',
-    emoji: '🏐',
     description: 'Areia quente, sol a pino',
     criteria: {
       temp_min_ideal: 28,
@@ -88,7 +81,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   pescaria: {
     name: 'Pescaria',
-    emoji: '🎣',
     description: 'Manhã tranquila, temperatura moderada',
     criteria: {
       temp_min_ideal: 20,
@@ -99,7 +91,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   piquenique: {
     name: 'Piquenique no Parque',
-    emoji: '🧺',
     description: 'Dia agradável sem calor extremo',
     criteria: {
       temp_min_ideal: 22,
@@ -112,7 +103,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   trilha: {
     name: 'Trilha/Caminhada',
-    emoji: '🥾',
     description: 'Clima ameno, pode ter chuva leve na mata',
     criteria: {
       temp_min_ideal: 18,
@@ -125,7 +115,6 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
   },
   customizavel: {
     name: 'Customizável',
-    emoji: '⚙️',
     description: 'Defina seu próprio tipo de evento',
     criteria: {
       temp_min_ideal: 20,

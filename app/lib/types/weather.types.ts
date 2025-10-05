@@ -21,7 +21,6 @@ export interface EventCriteria {
 
 export interface EventProfile {
   name: string;
-  emoji: string;
   description: string;
   criteria: EventCriteria;
 }
