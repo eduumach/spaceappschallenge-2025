@@ -36,8 +36,6 @@ export default function Results() {
   const { showToast } = useToast();
   const location = useLocation();
 
-  const currentLocale = i18n.language === 'en-US' ? enUS : ptBR;
-
   // Temperature unit based on user's language preference
   const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>(
     i18n.language === 'en-US' ? 'fahrenheit' : 'celsius'
