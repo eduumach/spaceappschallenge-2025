@@ -112,5 +112,30 @@
       "recent": "Last 10 years: Reflects more recent climate trends",
       "full": "Complete 20 years: Offers a broader historical perspective"
     }
+  },
+  "export": {
+    "title": "Data Export",
+    "description": "Download analysis results in different formats with complete metadata",
+    "json": {
+      "button": "Export JSON",
+      "description": "Structured format for programmatic analysis",
+      "success": "Data exported to JSON successfully!",
+      "error": "Error exporting data to JSON"
+    },
+    "csv": {
+      "button": "Export CSV",
+      "description": "Compatible with Excel and Google Sheets",
+      "success": "Data exported to CSV successfully!",
+      "error": "Error exporting data to CSV"
+    },
+    "metadata": {
+      "title": "Included metadata:",
+      "event": "Event type and weather criteria",
+      "location": "Location and coordinates",
+      "period": "Analyzed period",
+      "source": "Data source (NASA POWER)",
+      "timestamp": "Export date and time",
+      "units": "Measurement units ({{unit}})"
+    }
   }
 }

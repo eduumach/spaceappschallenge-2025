@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
-import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw, Share2, Thermometer } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw, Share2, Thermometer, Download, FileJson, FileSpreadsheet } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { CRITERIA_KEYS, EventProfileService } from "~/lib/services/event-profiles.service";
@@ -14,6 +14,7 @@ import { NASADataFetcherService } from "~/lib/services/nasa-data-fetcher.service
 import { WeatherAnalysisService } from "~/lib/services/weather-analysis.service";
 import { DateSuggestionsService } from "~/lib/services/date-suggestions.service";
 import { ProbabilityFormatterService } from "~/lib/services/probability-formatter.service";
+import { DataExportService } from "~/lib/services/data-export.service";
 import { useTranslation } from "~/i18n/useTranslation";
 import { useToast } from "~/components/toast-provider";
 import { formatTemperature, type TemperatureUnit } from "~/lib/utils/temperature";
@@ -209,6 +210,50 @@ export default function Results() {
         console.error('Error sharing:', error);
         showToast(t('share.error'), 'destructive');
       }
+    }
+  };
+
+  const handleExportJSON = () => {
+    try {
+      const exportData = DataExportService.prepareExportData(
+        perfil,
+        locationName,
+        latitude,
+        longitude,
+        dataInicio,
+        dataFim,
+        temperatureUnit,
+        melhorDia,
+        resultado,
+        sugestoesAlternativas
+      );
+      DataExportService.exportJSON(exportData);
+      showToast(t('export.json.success'), 'success');
+    } catch (error) {
+      console.error('Error exporting JSON:', error);
+      showToast(t('export.json.error'), 'destructive');
+    }
+  };
+
+  const handleExportCSV = () => {
+    try {
+      const exportData = DataExportService.prepareExportData(
+        perfil,
+        locationName,
+        latitude,
+        longitude,
+        dataInicio,
+        dataFim,
+        temperatureUnit,
+        melhorDia,
+        resultado,
+        sugestoesAlternativas
+      );
+      DataExportService.exportCSV(exportData);
+      showToast(t('export.csv.success'), 'success');
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      showToast(t('export.csv.error'), 'destructive');
     }
   };
 
@@ -643,6 +688,66 @@ export default function Results() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Exportação de Dados */}
+          {!loading && resultado.length > 0 && (
+            <Card className="border-2 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <Download className="h-5 w-5 text-primary" />
+                  {t('export.title')}
+                </CardTitle>
+                <CardDescription>
+                  {t('export.description')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col items-center gap-2"
+                    onClick={handleExportJSON}
+                  >
+                    <FileJson className="h-8 w-8 text-primary" />
+                    <div className="text-center">
+                      <div className="font-semibold">{t('export.json.button')}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {t('export.json.description')}
+                      </div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col items-center gap-2"
+                    onClick={handleExportCSV}
+                  >
+                    <FileSpreadsheet className="h-8 w-8 text-primary" />
+                    <div className="text-center">
+                      <div className="font-semibold">{t('export.csv.button')}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {t('export.csv.description')}
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+                <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border">
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p className="font-medium text-foreground">
+                      {t('export.metadata.title')}
+                    </p>
+                    <ul className="list-disc list-inside ml-2 text-xs space-y-0.5">
+                      <li>{t('export.metadata.event')}</li>
+                      <li>{t('export.metadata.location')}</li>
+                      <li>{t('export.metadata.period')}</li>
+                      <li>{t('export.metadata.source')}</li>
+                      <li>{t('export.metadata.timestamp')}</li>
+                      <li>{t('export.metadata.units', { unit: temperatureUnit === 'celsius' ? '°C' : '°F' })}</li>
+                    </ul>
+                  </div>
                 </div>
               </CardContent>
             </Card>
