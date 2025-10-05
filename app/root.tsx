@@ -62,7 +62,7 @@ const queryClient = new QueryClient();
 export default function App() {
   const showSplashScreen = useMounted()
 
-  if (showSplashScreen) {
+  if (!showSplashScreen) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <img src={queijo} alt="Loading..." className="h-24 w-24 animate-spin" />
