@@ -22,7 +22,7 @@ Este projeto responde ao desafio **"Vai chover na minha parada?"** da NASA, cons
 Utilizamos a [**NASA POWER API**](https://power.larc.nasa.gov/) (Prediction Of Worldwide Energy Resources), que fornece dados meteorológicos globais coletados ao longo de **várias décadas**.
 
 **Variáveis Climáticas Analisadas**:
-- **Temperatura** (T2M_MAX, T2M_MIN): Detecção de condições "muito quentes" ou "muito frias"
+- **Temperatura** (T2M_MAX, T2M_MIN, T2M): Detecção de condições "muito quentes" ou "muito frias"
 - **Precipitação** (PRECTOTCORR): Probabilidade de chuva ("muito úmido")
 - **Velocidade do Vento** (WS10M): Condições "muito ventosas"
 - **Umidade Relativa** (RH2M): Níveis de conforto e condições "muito desconfortáveis"
@@ -211,64 +211,29 @@ Dashboard completo com todas as métricas principais:
 
 ### Exemplo de Uso Completo
 
-**Cenário**: Casamento ao ar livre no Rio de Janeiro em 20 de Dezembro às 14h
+**Cenário**: Churrasco em Uberlândia no dia 15 de agosto de 2026 as 14:00
 
-**Passo 1: Entrada do Usuário**
-- **Localização**: Rio de Janeiro, Brasil (-22.9068, -43.1729)
-- **Data**: 20 de Dezembro
-- **Horário**: 14:00 (2:00 PM)
-- **Perfil**: Casamento ao ar livre (ou critérios personalizados)
+1. Passo 1: Seleciona Uberlândia no mapa
+![Seleção de Localização](./assets/screen/map-selector.png)
 
-**Passo 2: Critérios Aplicados**
-- **Temperatura**: 27-35°C (confortável, não "muito quente")
-- **Precipitação**: ≤1mm (sem chuva, não "muito úmido")
-- **Vento**: ≤15 m/s (calmo, não "muito ventoso")
-- **Umidade**: ≤75% (confortável, não "muito desconfortável")
+2. Passo 2: Escolhe 15 de agosto de 2026 às 14:00
+![Seleção de Data e Hora](./assets/screen/date-time-selector.png)
 
-**Passo 3: Análise dos Dados NASA**
-- Sistema busca dados de **20 de Dezembro** dos últimos **20 anos** (2005-2024)
-- Para cada ano, verifica se **TODAS** as condições foram atendidas
-- Compara dados reais vs. critérios definidos
+3. Passo 3: Seleciona perfil "Churrasco"
+![Seleção de Perfil de Evento](./assets/screen/event-profile-selector.png)
 
-**Passo 4: Resultados Obtidos**
+4. Passo 4: Visualiza resultados detalhados
+![Visualização de Resultados](./assets/screen/results-overview.png)
 
-Anos analisados: 20 (2005-2024)
-Anos ideais: 17
-Anos com falhas: 3
+5. Passo 5: Visualizar a tendências Climáticas
+![Análise de Tendências](./assets/screen/climate-trend.png)
 
-Detalhamento das falhas:
-- 2010: Chuva excessiva (5mm)
-- 2016: Temperatura muito alta (37°C)
-- 2019: Vento forte (18 m/s)
+6. Passo 6: Examina datas alternativas
+Como o exemplo de 15 de agosto foi 100% peguei o dia 24 de outubro de 2025 que deu 35%. E tem outras alternativas proximas.
+![Datas Alternativas](./assets/screen/alternative-dates.png)
 
-
-**Passo 5: Cálculo de Probabilidade**
-
-Probabilidade = (17 / 20) × 100% = 85%
-
-
-**Passo 6: Classificação**
-- **85% = EXCELENTE**
-- **Interpretação**: Em 85% dos anos, as condições foram ideais
-- **Risco**: 15% de chance de condições adversas
-
-**Passo 7: Recomendações**
-- **Data escolhida**: APROVADA (probabilidade excelente)
-- **Alternativa melhor**: 18 de Dezembro (92% - condições ainda melhores!)
-- **Outras boas opções**: 17, 19, 21 de Dezembro (todas >80%)
-
-**Passo 8: Visualizações Geradas**
-1. Gráfico de temperatura dos últimos 20 anos
-2. Padrão de precipitação (barras verdes/vermelhas)
-3. Dashboard multi-parâmetros completo
-4. Medidor de probabilidade visual (85%)
-5. Heatmap de datas alternativas
-6. Análise de tendências climáticas
-7. Infográfico resumo executivo
-
-**Resultado Final para o Usuário**:
-> "Seu casamento tem **85% de probabilidade** de ter condições climáticas perfeitas! No entanto, o dia **18 de Dezembro** apresenta condições ainda melhores (**92%**). Sugerimos considerar esta alternativa."
-
+7. Passo 7: Exportar dados
+![Exportação de Dados](./assets/screen/data-export.png)
 ---
 
 ## Metodologia Científica
