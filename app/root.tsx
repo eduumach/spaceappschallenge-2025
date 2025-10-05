@@ -17,6 +17,10 @@ import { ThemeProvider } from "./components/theme-provider";
 import { ToastProvider } from "./components/toast-provider";
 import i18n from "./i18n/config";
 import { useTranslation } from "./i18n";
+import { useEffect } from "react";
+import React from "react";
+
+import queijo from "../public/queijo.png?inline";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/queijo.png", type: "image/png" },
@@ -55,6 +59,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 const queryClient = new QueryClient();
 
 export default function App() {
+  const [showSplashScreen, setShowSplashScreen] = React.useState(true);
+  
+  useEffect(() => {
+    setShowSplashScreen(false);
+  })
+
+  if (showSplashScreen) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <img src={queijo} alt="Loading..." className="h-24 w-24 animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <I18nextProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
