@@ -51,6 +51,7 @@ export default function Analysis() {
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [perfilGerado, setPerfilGerado] = useState<any>(null);
   const [customCriteria, setCustomCriteria] = useState<any>({});
+  const [criteriaEnabled, setCriteriaEnabled] = useState<any>({});
 
   // Carregar dados do localStorage ao montar o componente
   useEffect(() => {
@@ -108,8 +109,15 @@ export default function Analysis() {
   useEffect(() => {
     if (perfilSelecionado && eventProfiles[perfilSelecionado]?.criteria) {
       setCustomCriteria(eventProfiles[perfilSelecionado].criteria);
+      // Habilita todos por padrão ao trocar de perfil
+      const enabled: any = {};
+      Object.keys(eventProfiles[perfilSelecionado].criteria).forEach(key => {
+        enabled[key] = true;
+      });
+      setCriteriaEnabled(enabled);
     } else {
       setCustomCriteria({});
+      setCriteriaEnabled({});
     }
   }, [perfilSelecionado]);
 
@@ -117,6 +125,13 @@ export default function Analysis() {
     setCustomCriteria((prev: any) => ({
       ...prev,
       [key]: value === '' ? '' : Number(value),
+    }));
+  };
+
+  const handleCriteriaEnabledChange = (key: string, checked: boolean) => {
+    setCriteriaEnabled((prev: any) => ({
+      ...prev,
+      [key]: checked,
     }));
   };
 
@@ -342,9 +357,18 @@ export default function Analysis() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {Object.entries(customCriteria).map(([key, value]) => (
                       <div key={key} className="flex flex-col">
-                        <Label htmlFor={`criteria-${key}`} className="mb-1 capitalize">
-                          {key.replace(/_/g, ' ')}
-                        </Label>
+                        <div className="flex items-center mb-1">
+                          <input
+                            type="checkbox"
+                            id={`criteria-enabled-${key}`}
+                            checked={criteriaEnabled[key] ?? true}
+                            onChange={e => handleCriteriaEnabledChange(key, e.target.checked)}
+                            className="mr-2 accent-primary h-4 w-4"
+                          />
+                          <Label htmlFor={`criteria-${key}`} className="capitalize cursor-pointer">
+                            {key.replace(/_/g, ' ')}
+                          </Label>
+                        </div>
                         <Input
                           id={`criteria-${key}`}
                           type="number"
@@ -353,12 +377,13 @@ export default function Analysis() {
                           className="h-10"
                           placeholder={typeof value === 'number' ? value.toString() : ''}
                           step="any"
+                          disabled={!criteriaEnabled[key]}
                         />
                       </div>
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Altere os valores para personalizar os critérios deste evento.
+                    Marque quais critérios devem ser filtrados e personalize os valores.
                   </p>
                 </div>
               )}
