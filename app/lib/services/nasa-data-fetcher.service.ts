@@ -6,6 +6,7 @@ export interface FetchParams {
   startDate: Date;
   endDate: Date;
   expansionDays?: number;
+  onProgress?: (completed: number, total: number) => void;
 }
 
 export interface FetchResult {
@@ -49,6 +50,8 @@ export class NASADataFetcherService {
     const startYear = currentYear - this.HISTORICAL_YEARS;
 
     const fetchPromises = [];
+    let completedRequests = 0;
+    const totalRequests = this.HISTORICAL_YEARS;
 
     for (let year = startYear; year < currentYear; year++) {
       const yearlyStartDate = this.formatDateForAPI(year, expandedStart);
@@ -61,7 +64,12 @@ export class NASADataFetcherService {
         yearlyEndDate,
         year,
         dataByDay
-      );
+      ).then(() => {
+        completedRequests++;
+        if (params.onProgress) {
+          params.onProgress(completedRequests, totalRequests);
+        }
+      });
 
       fetchPromises.push(promise);
     }

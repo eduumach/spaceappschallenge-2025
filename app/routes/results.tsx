@@ -5,7 +5,7 @@ import { Header } from "~/components/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, Loader2, TrendingUp, Sparkles, Home, RefreshCw } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { EventProfileService } from "~/lib/services/event-profiles.service";
@@ -41,6 +41,7 @@ export default function Results() {
   const locationName = searchParams.get('name') || '';
 
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
   const [resultado, setResultado] = useState<DayAnalysis[]>([]);
   const [melhorDia, setMelhorDia] = useState<DayAnalysis | null>(null);
   const [erro, setErro] = useState(false);
@@ -89,27 +90,36 @@ export default function Results() {
   const buscarDadosHistoricos = async () => {
     setLoading(true);
     setErro(false);
+    setProgress(0);
 
     try {
       const startDate = new Date(dataInicio);
       const endDate = new Date(dataFim);
 
-      // Fetch historical data using the service
+      // Step 1: Fetch historical data (0-60%)
+      setProgress(5);
       const fetchResult = await NASADataFetcherService.fetchHistoricalData({
         latitude,
         longitude,
         startDate,
         endDate,
-        expansionDays: 30
+        expansionDays: 30,
+        onProgress: (completed, total) => {
+          // Update progress from 5% to 60% based on completed requests
+          const progressPercent = 5 + Math.floor((completed / total) * 55);
+          setProgress(progressPercent);
+        }
       });
+      setProgress(60);
 
       const { dataByDay, selectedDays, allDays } = fetchResult;
 
-      // Analyze each day
+      // Step 2: Analyze each day (60-80%)
       const selectedAnalyses: DayAnalysis[] = [];
       const allAnalyses: DayAnalysis[] = [];
+      const totalDays = allDays.length;
 
-      allDays.forEach(day => {
+      allDays.forEach((day, index) => {
         const dayKey = `${(day.getMonth() + 1).toString().padStart(2, '0')}${day.getDate().toString().padStart(2, '0')}`;
         const historicalData = dataByDay.get(dayKey) || [];
 
@@ -126,7 +136,11 @@ export default function Results() {
             selectedAnalyses.push(analysis);
           }
         }
+
+        // Update progress for each day analyzed
+        setProgress(60 + Math.floor((index / totalDays) * 20));
       });
+      setProgress(80);
 
       if (selectedAnalyses.length === 0) {
         setErro(true);
@@ -136,11 +150,13 @@ export default function Results() {
 
       setResultado(selectedAnalyses);
 
-      // Find best day in selected range
+      // Step 3: Find best day (80-90%)
+      setProgress(85);
       const bestDay = WeatherAnalysisService.findBestDay(selectedAnalyses);
       setMelhorDia(bestDay);
+      setProgress(90);
 
-      // Find alternative suggestions
+      // Step 4: Find alternative suggestions (90-100%)
       const suggestions = DateSuggestionsService.findAlternativeDates(
         allAnalyses,
         selectedAnalyses,
@@ -149,6 +165,7 @@ export default function Results() {
         { maxSuggestions: 5 }
       );
       setSugestoesAlternativas(suggestions);
+      setProgress(100);
 
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
@@ -244,10 +261,20 @@ export default function Results() {
           {loading && (
             <Card className="border-2 shadow-lg">
               <CardContent className="p-12">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <div className="flex flex-col items-center justify-center space-y-6">
                   <p className="text-lg font-medium">{t('loading.analyzing')}</p>
-                  <p className="text-sm text-muted-foreground">{t('loading.wait')}</p>
+                  <div className="w-full max-w-md space-y-2">
+                    <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-300 ease-out"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>{t('loading.wait')}</span>
+                      <span className="font-medium">{progress}%</span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
