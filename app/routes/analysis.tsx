@@ -9,6 +9,7 @@ import { ArrowLeft, MapPin, Calendar, ArrowRight, Cloud, Satellite } from "lucid
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "~/lib/utils";
+import { EventProfileService } from "~/lib/services/event-profiles.service";
 import type { Route } from "./+types/analysis";
 import type { DateRange } from "react-day-picker";
 
@@ -19,64 +20,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-interface PerfilEvento {
-  nome: string;
-  emoji: string;
-  descricao: string;
-}
-
-const perfisEventos: Record<string, PerfilEvento> = {
-  praia: {
-    nome: 'Praia',
-    emoji: '🏖️',
-    descricao: 'Sol forte, calor intenso, céu limpo'
-  },
-  churrasco: {
-    nome: 'Churrasco',
-    emoji: '🍖',
-    descricao: 'Sem chuva, calor ou clima agradável'
-  },
-  pelada: {
-    nome: 'Pelada/Futebol',
-    emoji: '⚽',
-    descricao: 'Brasileiro joga bola em qualquer calor!'
-  },
-  festa_junina: {
-    nome: 'Festa Junina',
-    emoji: '🌽',
-    descricao: 'Clima de inverno brasileiro, fresquinho à noite'
-  },
-  samba_pagode: {
-    nome: 'Samba/Pagode ao Ar Livre',
-    emoji: '🎵',
-    descricao: 'Clima quente e animado para curtir'
-  },
-  carnaval: {
-    nome: 'Carnaval de Rua',
-    emoji: '🎉',
-    descricao: 'Calor ABSURDO de verão brasileiro!'
-  },
-  volei_praia: {
-    nome: 'Vôlei de Praia',
-    emoji: '🏐',
-    descricao: 'Areia quente, sol a pino'
-  },
-  pescaria: {
-    nome: 'Pescaria',
-    emoji: '🎣',
-    descricao: 'Manhã tranquila, temperatura moderada'
-  },
-  piquenique: {
-    nome: 'Piquenique no Parque',
-    emoji: '🧺',
-    descricao: 'Dia agradável sem calor extremo'
-  },
-  trilha: {
-    nome: 'Trilha/Caminhada',
-    emoji: '🥾',
-    descricao: 'Clima ameno, pode ter chuva leve na mata'
-  }
-};
+const eventProfiles = EventProfileService.getAllProfiles();
 
 export default function Analysis() {
   const [searchParams] = useSearchParams();
@@ -192,7 +136,7 @@ export default function Analysis() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {Object.entries(perfisEventos).map(([key, perfil]) => (
+              {Object.entries(eventProfiles).map(([key, profile]) => (
                 <button
                   key={key}
                   onClick={() => setPerfilSelecionado(key)}
@@ -202,12 +146,12 @@ export default function Analysis() {
                       : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
                   }`}
                 >
-                  <div className="text-3xl mb-2">{perfil.emoji}</div>
+                  <div className="text-3xl mb-2">{profile.emoji}</div>
                   <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
-                    {perfil.nome}
+                    {profile.name}
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {perfil.descricao}
+                    {profile.description}
                   </div>
                 </button>
               ))}
