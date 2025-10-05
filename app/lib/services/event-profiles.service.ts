@@ -127,6 +127,11 @@ const createEventProfiles = (): Record<string, EventProfile> => ({
 
 export const EVENT_PROFILES: Record<string, EventProfile> = createEventProfiles();
 
+// Deriva todas as chaves possíveis de criteria dos perfis
+export const CRITERIA_KEYS = Array.from(new Set(
+  Object.values(createEventProfiles()).flatMap(profile => Object.keys(profile.criteria))
+));
+
 // Listen to language changes and update profiles
 i18n.on('languageChanged', () => {
   const updatedProfiles = createEventProfiles();

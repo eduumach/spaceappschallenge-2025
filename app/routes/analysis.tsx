@@ -11,7 +11,7 @@ import { ArrowLeft, Calendar, ArrowRight, MousePointer2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { cn } from "~/lib/utils";
-import { EventProfileService } from "~/lib/services/event-profiles.service";
+import { CRITERIA_KEYS, EventProfileService } from "~/lib/services/event-profiles.service";
 import { useTranslation } from "~/i18n/useTranslation";
 import type { Route } from "./+types/analysis";
 import type { DateRange } from "react-day-picker";
@@ -123,14 +123,6 @@ export default function Analysis() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   }, [latitude, longitude, locationName, searchMode, dateRange, perfilSelecionado, nomeEventoCustomizado]);
 
-  // Gera a lista de todos os critérios possíveis
-  const allCriteriaKeys = useMemo(() => {
-    const keys = new Set<string>();
-    Object.values(eventProfiles).forEach(profile => {
-      Object.keys(profile.criteria).forEach(key => keys.add(key));
-    });
-    return Array.from(keys);
-  }, []);
 
   useEffect(() => {
     if (perfilSelecionado === CUSTOMIZAVEL_MANUAL_KEY) {
@@ -138,7 +130,7 @@ export default function Analysis() {
       setCriteriaEnabled((prev: any) => {
         if (Object.keys(prev).length === 0) {
           const enabled: any = {};
-          allCriteriaKeys.forEach(key => {
+          CRITERIA_KEYS.forEach(key => {
             enabled[key] = false;
           });
           return enabled;
@@ -149,7 +141,7 @@ export default function Analysis() {
       // Atualiza customCriteria para os critérios do preset
       setCustomCriteria((prev: any) => {
         const newCriteria: any = {};
-        allCriteriaKeys.forEach(key => {
+        CRITERIA_KEYS.forEach(key => {
           newCriteria[key] = eventProfiles[perfilSelecionado].criteria[key] ?? '';
         });
         return newCriteria;
@@ -157,13 +149,13 @@ export default function Analysis() {
       // Marca apenas os critérios definidos no preset
       setCriteriaEnabled((prev: any) => {
         const enabled: any = {};
-        allCriteriaKeys.forEach(key => {
+        CRITERIA_KEYS.forEach(key => {
           enabled[key] = key in eventProfiles[perfilSelecionado].criteria;
         });
         return enabled;
       });
     }
-  }, [perfilSelecionado, allCriteriaKeys]);
+  }, [perfilSelecionado, CRITERIA_KEYS]);
 
   // Atualiza criteriaQueryParams sempre que customCriteria ou criteriaEnabled mudar
   useEffect(() => {
@@ -393,13 +385,13 @@ export default function Analysis() {
               )}
 
               {/* Formulário de critérios do perfil selecionado */}
-              {customCriteria && allCriteriaKeys.length > 0 && (
+              {customCriteria && CRITERIA_KEYS.length > 0 && (
                 <div className="mt-6">
                   <Label className="text-base mb-2 block">
                     Critérios do evento
                   </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {allCriteriaKeys.map((key) => (
+                    {CRITERIA_KEYS.map((key) => (
                       <div key={key} className="flex flex-col">
                         <div className="flex items-center mb-1">
                           <input
