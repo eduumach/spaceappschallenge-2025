@@ -15,9 +15,9 @@ const createEventProfiles = (): Record<string, EventProfile> => ({
     ...getTranslatedProfile('praia'),
     criteria: {
       temp_min_ideal: 28,
-      temp_max_ideal: 42,
+      temp_max_ideal: 45,
       precipitation_max: 1,
-      wind_max: 10,
+      wind_max: 20,
       humidity_max: 80
     }
   },
@@ -25,8 +25,8 @@ const createEventProfiles = (): Record<string, EventProfile> => ({
     ...getTranslatedProfile('churrasco'),
     criteria: {
       temp_min_ideal: 20,
-      temp_max_ideal: 38,
-      precipitation_max: 2,
+      temp_max_ideal: 40,
+      precipitation_max: 1,
       wind_max: 15
     }
   },
@@ -43,7 +43,7 @@ const createEventProfiles = (): Record<string, EventProfile> => ({
     ...getTranslatedProfile('festa_junina'),
     criteria: {
       temp_min_ideal: 16,
-      temp_max_ideal: 28,
+      temp_max_ideal: 32,
       precipitation_max: 1,
       wind_max: 12,
       humidity_min: 35,
@@ -63,7 +63,7 @@ const createEventProfiles = (): Record<string, EventProfile> => ({
   carnaval: {
     ...getTranslatedProfile('carnaval'),
     criteria: {
-      temp_min_ideal: 30,
+      temp_min_ideal: 24,
       temp_max_ideal: 42,
       precipitation_max: 5,
       wind_max: 15,
@@ -75,7 +75,7 @@ const createEventProfiles = (): Record<string, EventProfile> => ({
     ...getTranslatedProfile('volei_praia'),
     criteria: {
       temp_min_ideal: 28,
-      temp_max_ideal: 40,
+      temp_max_ideal: 42,
       precipitation_max: 1,
       wind_max: 10,
       humidity_max: 75
