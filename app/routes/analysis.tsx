@@ -15,6 +15,7 @@ import { EventProfileService } from "~/lib/services/event-profiles.service";
 import { useTranslation } from "~/i18n/useTranslation";
 import type { Route } from "./+types/analysis";
 import type { DateRange } from "react-day-picker";
+import { useMemo } from "react";
 
 export function meta({ }: Route.MetaArgs) {
   const { t } = useTranslation('analysis');
@@ -49,6 +50,7 @@ export default function Analysis() {
   const [nomeEventoCustomizado, setNomeEventoCustomizado] = useState('');
   const [loadingPerfil, setLoadingPerfil] = useState(false);
   const [perfilGerado, setPerfilGerado] = useState<any>(null);
+  const [customCriteria, setCustomCriteria] = useState<any>({});
 
   // Carregar dados do localStorage ao montar o componente
   useEffect(() => {
@@ -102,6 +104,21 @@ export default function Analysis() {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   }, [latitude, longitude, locationName, searchMode, dateRange, perfilSelecionado, nomeEventoCustomizado]);
+
+  useEffect(() => {
+    if (perfilSelecionado && eventProfiles[perfilSelecionado]?.criteria) {
+      setCustomCriteria(eventProfiles[perfilSelecionado].criteria);
+    } else {
+      setCustomCriteria({});
+    }
+  }, [perfilSelecionado]);
+
+  const handleCriteriaChange = (key: string, value: string) => {
+    setCustomCriteria((prev: any) => ({
+      ...prev,
+      [key]: value === '' ? '' : Number(value),
+    }));
+  };
 
   if (!latitude || !longitude) {
     return (
@@ -312,6 +329,36 @@ export default function Analysis() {
                   />
                   <p className="text-xs text-muted-foreground">
                     {t('customEvent.hint')}
+                  </p>
+                </div>
+              )}
+
+              {/* Formulário de critérios do perfil selecionado */}
+              {customCriteria && Object.keys(customCriteria).length > 0 && (
+                <div className="mt-6">
+                  <Label className="text-base mb-2 block">
+                    Critérios do evento
+                  </Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {Object.entries(customCriteria).map(([key, value]) => (
+                      <div key={key} className="flex flex-col">
+                        <Label htmlFor={`criteria-${key}`} className="mb-1 capitalize">
+                          {key.replace(/_/g, ' ')}
+                        </Label>
+                        <Input
+                          id={`criteria-${key}`}
+                          type="number"
+                          value={value}
+                          onChange={e => handleCriteriaChange(key, e.target.value)}
+                          className="h-10"
+                          placeholder={typeof value === 'number' ? value.toString() : ''}
+                          step="any"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Altere os valores para personalizar os critérios deste evento.
                   </p>
                 </div>
               )}
