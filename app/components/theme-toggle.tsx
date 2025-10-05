@@ -2,10 +2,11 @@ import { Moon, Sun } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { useTheme } from "~/components/theme-provider"
 import { useTranslation } from "~/i18n"
+import { useMounted } from "~/lib/utils"
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
   const { t } = useTranslation('common')
-  
+  const mounted = useMounted()
   const toggleTheme = () => {
     if (theme === "light") {
       setTheme("dark")
@@ -41,11 +42,11 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      title={getTooltipText()}
+      title={!mounted ? "" : getTooltipText()}
       className="relative"
     >
       {getIcon()}
-      <span className="sr-only">{getTooltipText()}</span>
+      <span className="sr-only">{!mounted ? "" : getTooltipText()}</span>
     </Button>
   )
 }
