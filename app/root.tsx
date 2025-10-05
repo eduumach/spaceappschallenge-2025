@@ -17,10 +17,10 @@ import { ThemeProvider } from "./components/theme-provider";
 import { ToastProvider } from "./components/toast-provider";
 import i18n from "./i18n/config";
 import { useTranslation } from "./i18n";
-import { useEffect } from "react";
 import React from "react";
 
 import queijo from "../public/queijo.png?inline";
+import { useMounted } from "./lib/utils";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/queijo.png", type: "image/png" },
@@ -59,11 +59,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 const queryClient = new QueryClient();
 
 export default function App() {
-  const [showSplashScreen, setShowSplashScreen] = React.useState(true);
-  
-  useEffect(() => {
-    setShowSplashScreen(false);
-  })
+  const showSplashScreen = useMounted()
 
   if (showSplashScreen) {
     return (
