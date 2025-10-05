@@ -60,12 +60,7 @@ export default function Results() {
   const [sugestoesAlternativas, setSugestoesAlternativas] = useState<DayAnalysis[]>([]);
   
   // Decode and use the generated profile if available
-  let perfil = EventProfileService.getProfile(perfilKey) ?? {
-    name: "Custom",
-    description: "Custom profile",
-    criteria: {},
-
-  };
+  let perfil = EventProfileService.getProfile(perfilKey) ?? EventProfileService.getProfile("custom");
   CRITERIA_KEYS.forEach(key => {
     const params = new URLSearchParams(location.search);
     if (params.has(key)) {

@@ -11,6 +11,10 @@ const getTranslatedProfile = (key: string): { name: string; description: string 
 
 // Centralized event profiles with climate criteria
 const createEventProfiles = (): Record<string, EventProfile> => ({
+  custom: {
+    ...getTranslatedProfile('customizavel'),
+    criteria: {}
+  },
   praia: {
     ...getTranslatedProfile('praia'),
     criteria: {
