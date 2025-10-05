@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
@@ -15,7 +15,26 @@ import { EventProfileService } from "~/lib/services/event-profiles.service";
 import { useTranslation } from "~/i18n/useTranslation";
 import type { Route } from "./+types/analysis";
 import type { DateRange } from "react-day-picker";
-import { useMemo } from "react";
+
+const STORAGE_KEY = 'spaceapps_analysis_data';
+const CUSTOMIZAVEL_KEY = 'customizavel';
+const CUSTOMIZAVEL_MANUAL_KEY = 'customizavel_manual';
+
+const eventProfiles = {
+  ...EventProfileService.getAllProfiles(),
+  [CUSTOMIZAVEL_MANUAL_KEY]: {
+    name: 'Customizável Manual',
+    description: 'Defina manualmente os critérios do evento.',
+    criteria: {
+      temp_min_ideal: '',
+      temp_max_ideal: '',
+      precipitation_max: '',
+      wind_max: '',
+      humidity_min: '',
+      humidity_max: '',
+    },
+  },
+};
 
 export function meta({ }: Route.MetaArgs) {
   const { t } = useTranslation('analysis');
@@ -24,9 +43,6 @@ export function meta({ }: Route.MetaArgs) {
     { name: "description", content: t('meta.description') },
   ];
 }
-
-const STORAGE_KEY = 'spaceapps_analysis_data';
-const eventProfiles = EventProfileService.getAllProfiles();
 
 export default function Analysis() {
   const { t, i18n } = useTranslation('analysis');
@@ -106,20 +122,47 @@ export default function Analysis() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   }, [latitude, longitude, locationName, searchMode, dateRange, perfilSelecionado, nomeEventoCustomizado]);
 
+  // Gera a lista de todos os critérios possíveis
+  const allCriteriaKeys = useMemo(() => {
+    const keys = new Set<string>();
+    Object.values(eventProfiles).forEach(profile => {
+      Object.keys(profile.criteria).forEach(key => keys.add(key));
+    });
+    return Array.from(keys);
+  }, []);
+
   useEffect(() => {
-    if (perfilSelecionado && eventProfiles[perfilSelecionado]?.criteria) {
-      setCustomCriteria(eventProfiles[perfilSelecionado].criteria);
-      // Habilita todos por padrão ao trocar de perfil
-      const enabled: any = {};
-      Object.keys(eventProfiles[perfilSelecionado].criteria).forEach(key => {
-        enabled[key] = true;
+    if (perfilSelecionado === CUSTOMIZAVEL_MANUAL_KEY) {
+      // Não atualiza customCriteria, mantém edição manual
+      setCriteriaEnabled((prev: any) => {
+        if (Object.keys(prev).length === 0) {
+          const enabled: any = {};
+          allCriteriaKeys.forEach(key => {
+            enabled[key] = false;
+          });
+          return enabled;
+        }
+        return prev;
       });
-      setCriteriaEnabled(enabled);
-    } else {
-      setCustomCriteria({});
-      setCriteriaEnabled({});
+    } else if (perfilSelecionado && eventProfiles[perfilSelecionado]?.criteria) {
+      // Atualiza customCriteria para os critérios do preset
+      setCustomCriteria((prev: any) => {
+        const newCriteria: any = {};
+        allCriteriaKeys.forEach(key => {
+          newCriteria[key] = eventProfiles[perfilSelecionado].criteria[key] ?? '';
+        });
+        return newCriteria;
+      });
+      // Marca apenas os critérios definidos no preset
+      setCriteriaEnabled((prev: any) => {
+        const enabled: any = {};
+        allCriteriaKeys.forEach(key => {
+          enabled[key] = key in eventProfiles[perfilSelecionado].criteria;
+        });
+        return enabled;
+      });
     }
-  }, [perfilSelecionado]);
+  }, [perfilSelecionado, allCriteriaKeys]);
 
   const handleCriteriaChange = (key: string, value: string) => {
     setCustomCriteria((prev: any) => ({
@@ -329,7 +372,7 @@ export default function Analysis() {
               </div>
 
               {/* Campo de input para evento customizado */}
-              {perfilSelecionado === 'customizavel' && (
+              {perfilSelecionado === CUSTOMIZAVEL_KEY && (
                 <div className="mt-4 space-y-2">
                   <Label htmlFor="custom-event-name" className="text-base">
                     {t('customEvent.label')}
@@ -349,21 +392,22 @@ export default function Analysis() {
               )}
 
               {/* Formulário de critérios do perfil selecionado */}
-              {customCriteria && Object.keys(customCriteria).length > 0 && (
+              {customCriteria && allCriteriaKeys.length > 0 && (
                 <div className="mt-6">
                   <Label className="text-base mb-2 block">
                     Critérios do evento
                   </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {Object.entries(customCriteria).map(([key, value]) => (
+                    {allCriteriaKeys.map((key) => (
                       <div key={key} className="flex flex-col">
                         <div className="flex items-center mb-1">
                           <input
                             type="checkbox"
                             id={`criteria-enabled-${key}`}
-                            checked={criteriaEnabled[key] ?? true}
+                            checked={perfilSelecionado === CUSTOMIZAVEL_MANUAL_KEY ? (criteriaEnabled[key] ?? false) : (criteriaEnabled[key] ?? false)}
                             onChange={e => handleCriteriaEnabledChange(key, e.target.checked)}
                             className="mr-2 accent-primary h-4 w-4"
+                            disabled={perfilSelecionado !== CUSTOMIZAVEL_MANUAL_KEY}
                           />
                           <Label htmlFor={`criteria-${key}`} className="capitalize cursor-pointer">
                             {key.replace(/_/g, ' ')}
@@ -372,12 +416,12 @@ export default function Analysis() {
                         <Input
                           id={`criteria-${key}`}
                           type="number"
-                          value={value}
+                          value={customCriteria[key] ?? ''}
                           onChange={e => handleCriteriaChange(key, e.target.value)}
                           className="h-10"
-                          placeholder={typeof value === 'number' ? value.toString() : ''}
+                          placeholder={typeof customCriteria[key] === 'number' ? customCriteria[key].toString() : ''}
                           step="any"
-                          disabled={!criteriaEnabled[key]}
+                          disabled={perfilSelecionado !== CUSTOMIZAVEL_MANUAL_KEY || !criteriaEnabled[key]}
                         />
                       </div>
                     ))}
