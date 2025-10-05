@@ -19,7 +19,7 @@ import i18n from "./i18n/config";
 import { useTranslation } from "./i18n";
 import React from "react";
 
-import queijo from "../public/queijo.png?inline";
+import queijo from "./queijo.png?inline";
 import { useMounted } from "./lib/utils";
 
 export const links: Route.LinksFunction = () => [
