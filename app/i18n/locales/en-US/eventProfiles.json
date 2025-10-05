@@ -42,5 +42,9 @@
   "customizavel": {
     "name": "Customizable",
     "description": "Define your own event type"
+  },
+  "custom": {
+    "name": "Manually Customizable",
+    "description": "Define manually the event's criteria."
   }
 }

@@ -1,4 +1,4 @@
-import type { EventProfile } from "~/lib/types/weather.types";
+import type { EventCriteria, EventProfile } from "~/lib/types/weather.types";
 import i18n from "~/i18n/config";
 
 // Get translated profile data
@@ -9,125 +9,104 @@ const getTranslatedProfile = (key: string): { name: string; description: string 
   };
 };
 
-// Centralized event profiles with climate criteria
-const createEventProfiles = (): Record<string, EventProfile> => ({
-  custom: {
-    ...getTranslatedProfile('customizavel'),
-    criteria: {}
-  },
+const eventPresets: Record<string, EventCriteria> = {
   praia: {
-    ...getTranslatedProfile('praia'),
-    criteria: {
-      temp_min_ideal: 28,
-      temp_max_ideal: 45,
-      precipitation_max: 1,
-      wind_max: 20,
-      humidity_max: 80
-    }
+    temp_min_ideal: 28,
+    temp_max_ideal: 45,
+    precipitation_max: 1,
+    wind_max: 20,
+    humidity_max: 80
   },
   churrasco: {
-    ...getTranslatedProfile('churrasco'),
-    criteria: {
-      temp_min_ideal: 20,
-      temp_max_ideal: 40,
-      precipitation_max: 1,
-      wind_max: 15
-    }
+    temp_min_ideal: 20,
+    temp_max_ideal: 40,
+    precipitation_max: 1,
+    wind_max: 15
   },
   pelada: {
-    ...getTranslatedProfile('pelada'),
-    criteria: {
-      temp_min_ideal: 20,
-      temp_max_ideal: 38,
-      precipitation_max: 3,
-      wind_max: 15
-    }
+    temp_min_ideal: 20,
+    temp_max_ideal: 38,
+    precipitation_max: 3,
+    wind_max: 15
   },
   festa_junina: {
-    ...getTranslatedProfile('festa_junina'),
-    criteria: {
-      temp_min_ideal: 16,
-      temp_max_ideal: 32,
-      precipitation_max: 1,
-      wind_max: 12,
-      humidity_min: 35,
-      humidity_max: 65
-    }
+    temp_min_ideal: 16,
+    temp_max_ideal: 32,
+    precipitation_max: 1,
+    wind_max: 12,
+    humidity_min: 35,
+    humidity_max: 65
   },
   samba_pagode: {
-    ...getTranslatedProfile('samba_pagode'),
-    criteria: {
-      temp_min_ideal: 24,
-      temp_max_ideal: 36,
-      precipitation_max: 2,
-      wind_max: 12,
-      humidity_max: 80
-    }
+    temp_min_ideal: 24,
+    temp_max_ideal: 36,
+    precipitation_max: 2,
+    wind_max: 12,
+    humidity_max: 80
   },
   carnaval: {
-    ...getTranslatedProfile('carnaval'),
-    criteria: {
-      temp_min_ideal: 24,
-      temp_max_ideal: 42,
-      precipitation_max: 5,
-      wind_max: 15,
-      humidity_min: 55,
-      humidity_max: 90
-    }
+    temp_min_ideal: 24,
+    temp_max_ideal: 42,
+    precipitation_max: 5,
+    wind_max: 15,
+    humidity_min: 55,
+    humidity_max: 90
   },
   volei_praia: {
-    ...getTranslatedProfile('volei_praia'),
-    criteria: {
-      temp_min_ideal: 28,
-      temp_max_ideal: 42,
-      precipitation_max: 1,
-      wind_max: 10,
-      humidity_max: 75
-    }
+    temp_min_ideal: 28,
+    temp_max_ideal: 42,
+    precipitation_max: 1,
+    wind_max: 10,
+    humidity_max: 75
   },
   pescaria: {
-    ...getTranslatedProfile('pescaria'),
-    criteria: {
-      temp_min_ideal: 20,
-      temp_max_ideal: 32,
-      precipitation_max: 2,
-      wind_max: 12
-    }
+    temp_min_ideal: 20,
+    temp_max_ideal: 32,
+    precipitation_max: 2,
+    wind_max: 12
   },
   piquenique: {
-    ...getTranslatedProfile('piquenique'),
-    criteria: {
-      temp_min_ideal: 22,
-      temp_max_ideal: 30,
-      precipitation_max: 0.5,
-      wind_max: 10,
-      humidity_min: 40,
-      humidity_max: 70
-    }
+    temp_min_ideal: 22,
+    temp_max_ideal: 30,
+    precipitation_max: 0.5,
+    wind_max: 10,
+    humidity_min: 40,
+    humidity_max: 70
   },
   trilha: {
-    ...getTranslatedProfile('trilha'),
-    criteria: {
-      temp_min_ideal: 18,
-      temp_max_ideal: 28,
-      precipitation_max: 5,
-      wind_max: 12,
-      humidity_min: 40,
-      humidity_max: 85
-    }
+    temp_min_ideal: 18,
+    temp_max_ideal: 28,
+    precipitation_max: 5,
+    wind_max: 12,
+    humidity_min: 40,
+    humidity_max: 85
   },
   customizavel: {
-    ...getTranslatedProfile('customizavel'),
-    criteria: {
-      temp_min_ideal: 20,
-      temp_max_ideal: 30,
-      precipitation_max: 2,
-      wind_max: 10,
-      humidity_min: 40,
-      humidity_max: 70
+    temp_min_ideal: 20,
+    temp_max_ideal: 30,
+    precipitation_max: 2,
+    wind_max: 10,
+    humidity_min: 40,
+    humidity_max: 70
+  },
+  custom: {},
+}
+
+// Centralized event profiles with climate criteria
+const createEventProfiles : () => Record<string, EventProfile> = () => {
+  const ret: Record<string, EventProfile> = {}
+  for (const key of Object.keys(eventPresets)) {
+    const criteria = eventPresets[key]
+    console.log(criteria)
+    ret[key] = {
+      name: "", // vai ser definido no front mesmo
+      description: "",
+      criteria
     }
   }
-});
+  // console.log(ret, eventPresets)
+  return ret
+}
 
 export const EVENT_PROFILES: Record<string, EventProfile> = createEventProfiles();
 
