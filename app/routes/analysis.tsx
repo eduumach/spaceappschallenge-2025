@@ -20,7 +20,7 @@ import type { DateRange } from "react-day-picker";
 
 const STORAGE_KEY = 'spaceapps_analysis_data';
 const CUSTOMIZAVEL_KEY = 'customizavel';
-const CUSTOMIZAVEL_MANUAL_KEY = 'customizavel_manual';
+const CUSTOMIZAVEL_MANUAL_KEY = 'custom';
 
 
 export function meta({ }: Route.MetaArgs) {
@@ -54,17 +54,13 @@ export default function Analysis() {
     });
     
     // Add manual customizable profile
-    translatedProfiles[CUSTOMIZAVEL_MANUAL_KEY] = {
-      name: t('profiles.customizavel_manual.name'),
-      description: t('profiles.customizavel_manual.description'),
-      criteria: {
-        temp_min_ideal: '',
-        temp_max_ideal: '',
-        precipitation_max: '',
-        wind_max: '',
-        humidity_min: '',
-        humidity_max: '',
-      },
+    translatedProfiles[CUSTOMIZAVEL_MANUAL_KEY]['criteria'] = {
+      temp_min_ideal: '',
+      temp_max_ideal: '',
+      precipitation_max: '',
+      wind_max: '',
+      humidity_min: '',
+      humidity_max: '',
     };
     
     return translatedProfiles;
