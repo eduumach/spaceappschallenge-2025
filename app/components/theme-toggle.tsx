@@ -1,10 +1,11 @@
 import { Moon, Sun } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { useTheme } from "~/components/theme-provider"
-
+import { useTranslation } from "~/i18n"
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
-
+  const { t } = useTranslation('common')
+  
   const toggleTheme = () => {
     if (theme === "light") {
       setTheme("dark")
@@ -27,11 +28,11 @@ export function ThemeToggle() {
 
   const getTooltipText = () => {
     if (theme === "light") {
-      return "Mudar para tema escuro"
+      return t("theme.toggle.to_dark")
     } else if (theme === "dark") {
-      return "Mudar para tema do sistema"
+      return t("theme.toggle.to_light")
     } else {
-      return "Mudar para tema claro"
+      return t("theme.toggle.to_system")
     }
   }
 

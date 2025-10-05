@@ -5,5 +5,12 @@
   "language": "Idioma",
   "changeLanguage": "Alterar idioma",
   "english": "Inglês",
-  "portuguese": "Português"
+  "portuguese": "Português",
+  "theme": {
+    "toggle": {
+      "to_light": "Mudar para tema claro",
+      "to_dark": "Mudar para tema escuro",
+      "to_system": "Mudar para tema do sistema"
+    }
+  }
 }

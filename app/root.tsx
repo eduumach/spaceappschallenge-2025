@@ -14,7 +14,6 @@ import { I18nextProvider } from "react-i18next";
 import type { Route } from "./+types/root";
 import "./app.css";
 import { ThemeProvider } from "./components/theme-provider";
-import { Header } from "./components/header";
 import { ToastProvider } from "./components/toast-provider";
 import i18n from "./i18n/config";
 
@@ -34,7 +33,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang={i18n.language}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
