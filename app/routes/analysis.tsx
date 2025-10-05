@@ -3,10 +3,11 @@ import { Link, useSearchParams, useNavigate } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
 import { Calendar as CalendarComponent } from "~/components/ui/calendar";
 import { Header } from "~/components/header";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { ArrowLeft, Calendar, ArrowRight, Cloud, Satellite } from "lucide-react";
+import { ArrowLeft, Calendar, ArrowRight, MousePointer2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "~/lib/utils";
@@ -34,6 +35,7 @@ export default function Analysis() {
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [perfilSelecionado, setPerfilSelecionado] = useState('praia');
+  const [nomeEventoCustomizado, setNomeEventoCustomizado] = useState('');
 
   if (!latitude || !longitude) {
     return (
@@ -60,6 +62,11 @@ export default function Analysis() {
       return;
     }
 
+    if (perfilSelecionado === 'customizavel' && !nomeEventoCustomizado.trim()) {
+      alert('Por favor, digite o nome do seu evento personalizado');
+      return;
+    }
+
     const params = new URLSearchParams({
       lat: latitude.toString(),
       lng: longitude.toString(),
@@ -71,6 +78,10 @@ export default function Analysis() {
 
     if (locationName) {
       params.append('name', locationName);
+    }
+
+    if (perfilSelecionado === 'customizavel' && nomeEventoCustomizado.trim()) {
+      params.append('customEventName', nomeEventoCustomizado.trim());
     }
 
     navigate(`/results?${params.toString()}`);
@@ -152,7 +163,7 @@ export default function Analysis() {
           <Card className="border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Satellite className="h-5 w-5 text-primary" />
+                <MousePointer2 className="h-5 w-5 text-primary" />
                 Tipo de Evento
               </CardTitle>
               <CardDescription>
@@ -166,8 +177,8 @@ export default function Analysis() {
                     key={key}
                     onClick={() => setPerfilSelecionado(key)}
                     className={`p-4 rounded-lg border-2 transition-all text-left ${perfilSelecionado === key
-                        ? 'border-primary bg-primary/10 shadow-md'
-                        : 'border-border hover:border-primary/50'
+                      ? 'border-primary bg-primary/10 shadow-md'
+                      : 'border-border hover:border-primary/50'
                       }`}
                   >
                     <div className="text-sm font-semibold text-foreground mb-1">
@@ -179,6 +190,26 @@ export default function Analysis() {
                   </button>
                 ))}
               </div>
+
+              {/* Campo de input para evento customizado */}
+              {perfilSelecionado === 'customizavel' && (
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="custom-event-name" className="text-base">
+                    Nome do seu evento
+                  </Label>
+                  <Input
+                    id="custom-event-name"
+                    type="text"
+                    placeholder="Ex: Festa de aniversário, Reunião familiar..."
+                    value={nomeEventoCustomizado}
+                    onChange={(e) => setNomeEventoCustomizado(e.target.value)}
+                    className="h-12 text-base"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Digite o nome do seu evento personalizado para identificação nos resultados
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

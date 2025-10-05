@@ -32,6 +32,7 @@ export default function Results() {
   const dataFim = searchParams.get('dataFim') || '';
   const perfilKey = searchParams.get('perfil') || 'praia';
   const locationName = searchParams.get('name') || '';
+  const customEventName = searchParams.get('customEventName') || '';
 
   const [loading, setLoading] = useState(true);
   const [resultado, setResultado] = useState<DayAnalysis[]>([]);
@@ -191,7 +192,9 @@ export default function Results() {
                   <Cloud className="h-4 w-4" />
                   Tipo de Evento
                 </p>
-                <p className="font-semibold text-lg">{perfil.emoji} {perfil.name}</p>
+                <p className="font-semibold text-lg">
+                  {perfil.emoji} {perfilKey === 'customizavel' && customEventName ? customEventName : perfil.name}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">

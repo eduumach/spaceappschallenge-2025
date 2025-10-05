@@ -122,6 +122,19 @@ export const EVENT_PROFILES: Record<string, EventProfile> = {
       humidity_min: 40,
       humidity_max: 85
     }
+  },
+  customizavel: {
+    name: 'Customizável',
+    emoji: '⚙️',
+    description: 'Defina seu próprio tipo de evento',
+    criteria: {
+      temp_min_ideal: 20,
+      temp_max_ideal: 30,
+      precipitation_max: 2,
+      wind_max: 10,
+      humidity_min: 40,
+      humidity_max: 70
+    }
   }
 };
 
