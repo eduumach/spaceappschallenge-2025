@@ -1,6 +1,6 @@
 // Página de resultados de análise climática - criada pelo Claude Sonnet 4.5
 import { useState, useEffect } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router";
+import { Link, useSearchParams, useNavigate, useLocation } from "react-router";
 import { Header } from "~/components/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/
 import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw, Share2, Thermometer } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
-import { EventProfileService } from "~/lib/services/event-profiles.service";
+import { CRITERIA_KEYS, EventProfileService } from "~/lib/services/event-profiles.service";
 import { NASADataFetcherService } from "~/lib/services/nasa-data-fetcher.service";
 import { WeatherAnalysisService } from "~/lib/services/weather-analysis.service";
 import { DateSuggestionsService } from "~/lib/services/date-suggestions.service";
@@ -17,7 +17,7 @@ import { ProbabilityFormatterService } from "~/lib/services/probability-formatte
 import { useTranslation } from "~/i18n/useTranslation";
 import { useToast } from "~/components/toast-provider";
 import { formatTemperature, type TemperatureUnit } from "~/lib/utils/temperature";
-import type { DayAnalysis } from "~/lib/types/weather.types";
+import type { DayAnalysis, EventCriteria } from "~/lib/types/weather.types";
 import type { Route } from "./+types/results";
 
 export function meta({}: Route.MetaArgs) {
@@ -34,6 +34,7 @@ export default function Results() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const location = useLocation();
 
   const currentLocale = i18n.language === 'en-US' ? enUS : ptBR;
 
@@ -55,23 +56,25 @@ export default function Results() {
   const [melhorDia, setMelhorDia] = useState<DayAnalysis | null>(null);
   const [erro, setErro] = useState(false);
   const [sugestoesAlternativas, setSugestoesAlternativas] = useState<DayAnalysis[]>([]);
-
-  // Get generated profile from URL (base64 encoded)
-  const encodedProfile = searchParams.get('generatedProfile') || '';
   
   // Decode and use the generated profile if available
-  let perfil = EventProfileService.getProfile(perfilKey);
-  
-  if (encodedProfile) {
-    try {
-      const decodedProfile = JSON.parse(atob(encodedProfile));
-      perfil = decodedProfile;
-    } catch (error) {
-      console.error('Error decoding profile:', error);
-      // Fallback to default profile
-    }
-  }
+  let perfil = EventProfileService.getProfile(perfilKey) ?? {
+    name: "Custom",
+    description: "Custom profile",
+    criteria: {},
 
+  };
+  CRITERIA_KEYS.forEach(key => {
+    const params = new URLSearchParams(location.search);
+    if (params.has(key)) {
+      const value = parseFloat(params.get(key) ?? "");
+      if (!isNaN(value)) {
+        perfil.criteria[key as keyof EventCriteria] = value
+      } 
+    }
+  })
+
+  // console.log(perfil)
   if (!perfil) {
     return (
       <div className="min-h-screen bg-background">
