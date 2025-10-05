@@ -68,6 +68,7 @@ export default function Analysis() {
   const [perfilGerado, setPerfilGerado] = useState<any>(null);
   const [customCriteria, setCustomCriteria] = useState<any>({});
   const [criteriaEnabled, setCriteriaEnabled] = useState<any>({});
+  const [criteriaQueryParams, setCriteriaQueryParams] = useState<Record<string, string>>({});
 
   // Carregar dados do localStorage ao montar o componente
   useEffect(() => {
@@ -164,6 +165,17 @@ export default function Analysis() {
     }
   }, [perfilSelecionado, allCriteriaKeys]);
 
+  // Atualiza criteriaQueryParams sempre que customCriteria ou criteriaEnabled mudar
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    Object.entries(customCriteria).forEach(([key, value]) => {
+      if (criteriaEnabled[key] && value !== '' && value !== undefined && value !== null) {
+        params[key] = String(value);
+      }
+    });
+    setCriteriaQueryParams(params);
+  }, [customCriteria, criteriaEnabled]);
+
   const handleCriteriaChange = (key: string, value: string) => {
     setCustomCriteria((prev: any) => ({
       ...prev,
@@ -205,7 +217,20 @@ export default function Analysis() {
       alert(t('alerts.enterCustomEventName'));
       return;
     }
-
+    const params = new URLSearchParams({
+      lat: latitude.toString(),
+      lng: longitude.toString(),
+      dataInicio: dateRange.from.toISOString(),
+      dataFim: dateRange.to.toISOString(),
+      perfil: perfilSelecionado,
+      mode: searchMode,
+    });
+    if (locationName) {
+      params.append('name', locationName);
+    }
+    Object.keys(criteriaQueryParams).forEach(key => {
+      params.append(key, criteriaQueryParams[key]);
+    })
     // Se for customizado, gerar o perfil primeiro
     if (perfilSelecionado === 'customizavel' && nomeEventoCustomizado.trim()) {
       setLoadingPerfil(true);
@@ -222,51 +247,27 @@ export default function Analysis() {
 
         const result = await response.json();
 
-        if (result.success && result.data) {
-          // Codificar os dados do perfil gerado em base64 para passar na URL
-          const encodedProfile = btoa(JSON.stringify(result.data));
-          
-          const params = new URLSearchParams({
-            lat: latitude.toString(),
-            lng: longitude.toString(),
-            dataInicio: dateRange.from.toISOString(),
-            dataFim: dateRange.to.toISOString(),
-            perfil: perfilSelecionado,
-            mode: searchMode,
-            generatedProfile: encodedProfile
-          });
+        // Monta os parâmetros da URL antes do if
+        
+        // TODO: pegar dados da LLM
+        Object.entries(criteriaQueryParams).forEach(([key, value]) => {
+          params.append(key, value);
+        });
 
-          if (locationName) {
-            params.append('name', locationName);
-          }
-
-          navigate(`/results?${params.toString()}`);
-        } else {
+        if (!(result.success && result.data)) {
           alert('Erro ao gerar perfil do evento. Tente novamente.');
+          return
         }
       } catch (error) {
         console.error('Error generating profile:', error);
         alert('Erro ao conectar com o servidor. Tente novamente.');
+        return
       } finally {
         setLoadingPerfil(false);
       }
-    } else {
-      // Perfil pré-definido, navegar direto
-      const params = new URLSearchParams({
-        lat: latitude.toString(),
-        lng: longitude.toString(),
-        dataInicio: dateRange.from.toISOString(),
-        dataFim: dateRange.to.toISOString(),
-        perfil: perfilSelecionado,
-        mode: searchMode,
-      });
-
-      if (locationName) {
-        params.append('name', locationName);
-      }
-
-      navigate(`/results?${params.toString()}`);
     }
+    console.log(params)
+    navigate(`/results?${params.toString()}`);
   };
 
   return (
