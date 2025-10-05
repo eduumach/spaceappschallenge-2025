@@ -1,11 +1,11 @@
 // Página de resultados de análise climática - criada pelo Claude Sonnet 4.5
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams, useNavigate } from "react-router";
 import { Header } from "~/components/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, Loader2, TrendingUp, Sparkles, Home } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, Loader2, TrendingUp, Sparkles, Home, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EventProfileService } from "~/lib/services/event-profiles.service";
@@ -26,6 +26,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Results() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const latitude = parseFloat(searchParams.get('lat') || '0');
   const longitude = parseFloat(searchParams.get('lng') || '0');
@@ -33,7 +34,6 @@ export default function Results() {
   const dataFim = searchParams.get('dataFim') || '';
   const perfilKey = searchParams.get('perfil') || 'praia';
   const locationName = searchParams.get('name') || '';
-  const customEventName = searchParams.get('customEventName') || '';
 
   const [loading, setLoading] = useState(true);
   const [resultado, setResultado] = useState<DayAnalysis[]>([]);
@@ -52,12 +52,10 @@ export default function Results() {
           <p className="text-muted-foreground mb-6">
             O tipo de evento selecionado não foi encontrado.
           </p>
-          <Link to="/">
-            <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar ao Início
-            </Button>
-          </Link>
+          <Button onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
         </div>
       </div>
     );
@@ -151,12 +149,10 @@ export default function Results() {
           <p className="text-muted-foreground mb-6">
             Informações necessárias não foram fornecidas. Por favor, retorne e complete todas as etapas.
           </p>
-          <Link to="/">
-            <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar ao Início
-            </Button>
-          </Link>
+          <Button onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
         </div>
       </div>
     );
@@ -170,11 +166,9 @@ export default function Results() {
           {/* Page Header */}
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-2">
-              <Link to="/">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 Resultados da Análise
               </h1>
@@ -464,13 +458,17 @@ export default function Results() {
           {!loading && <div className="h-16"></div>}
         </div>
 
-        {/* Botão fixo para nova análise */}
+        {/* Botões fixos */}
         {!loading && (
           <div className="fixed bottom-0 left-0 right-0 p-3 bg-background border-t shadow-lg z-[1000]">
             <div className="max-w-6xl mx-auto flex gap-2">
+              <Button variant="outline" className="flex-1 h-10" onClick={() => navigate(-1)}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Editar Análise
+              </Button>
               <Link to="/" className="flex-1">
                 <Button className="w-full h-10">
-                  <Home className="h-4 w-4 mr-2" />
+                  <RefreshCw className="h-4 w-4 mr-2" />
                   Nova Análise
                 </Button>
               </Link>

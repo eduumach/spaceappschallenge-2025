@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
@@ -22,20 +22,79 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
+const STORAGE_KEY = 'spaceapps_analysis_data';
 const eventProfiles = EventProfileService.getAllProfiles();
 
 export default function Analysis() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const latitude = parseFloat(searchParams.get('lat') || '0');
-  const longitude = parseFloat(searchParams.get('lng') || '0');
-  const locationName = searchParams.get('name') || '';
-  const searchMode = searchParams.get('mode') || 'map';
+  // Pegar dados da URL ou do localStorage
+  const urlLatitude = parseFloat(searchParams.get('lat') || '0');
+  const urlLongitude = parseFloat(searchParams.get('lng') || '0');
+  const urlLocationName = searchParams.get('name') || '';
+  const urlSearchMode = searchParams.get('mode') || 'map';
 
+  const [latitude, setLatitude] = useState(urlLatitude);
+  const [longitude, setLongitude] = useState(urlLongitude);
+  const [locationName, setLocationName] = useState(urlLocationName);
+  const [searchMode, setSearchMode] = useState(urlSearchMode);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [perfilSelecionado, setPerfilSelecionado] = useState('praia');
   const [nomeEventoCustomizado, setNomeEventoCustomizado] = useState('');
+
+  // Carregar dados do localStorage ao montar o componente
+  useEffect(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+
+        // Se não tem dados na URL, usar do localStorage
+        if (!urlLatitude && parsed.latitude) {
+          setLatitude(parsed.latitude);
+        }
+        if (!urlLongitude && parsed.longitude) {
+          setLongitude(parsed.longitude);
+        }
+        if (!urlLocationName && parsed.locationName) {
+          setLocationName(parsed.locationName);
+        }
+        if (!urlSearchMode && parsed.searchMode) {
+          setSearchMode(parsed.searchMode);
+        }
+
+        if (parsed.dateRange) {
+          setDateRange({
+            from: parsed.dateRange.from ? new Date(parsed.dateRange.from) : undefined,
+            to: parsed.dateRange.to ? new Date(parsed.dateRange.to) : undefined,
+          });
+        }
+        if (parsed.perfilSelecionado) {
+          setPerfilSelecionado(parsed.perfilSelecionado);
+        }
+        if (parsed.nomeEventoCustomizado) {
+          setNomeEventoCustomizado(parsed.nomeEventoCustomizado);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados de análise salvos:', error);
+      }
+    }
+  }, [urlLatitude, urlLongitude, urlLocationName, urlSearchMode]);
+
+  // Salvar dados no localStorage quando mudarem
+  useEffect(() => {
+    const dataToSave = {
+      latitude,
+      longitude,
+      locationName,
+      searchMode,
+      dateRange,
+      perfilSelecionado,
+      nomeEventoCustomizado,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+  }, [latitude, longitude, locationName, searchMode, dateRange, perfilSelecionado, nomeEventoCustomizado]);
 
   if (!latitude || !longitude) {
     return (
@@ -45,12 +104,10 @@ export default function Analysis() {
           <p className="text-muted-foreground mb-6">
             Nenhuma coordenada válida foi fornecida. Por favor, retorne à página inicial e selecione uma localização.
           </p>
-          <Link to="/">
-            <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar ao Início
-            </Button>
-          </Link>
+          <Button onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
         </div>
       </div>
     );
@@ -95,11 +152,9 @@ export default function Analysis() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-2">
-              <Link to="/">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                 Análise de Dados Climáticos
               </h1>
