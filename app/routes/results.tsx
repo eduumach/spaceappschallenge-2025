@@ -193,7 +193,7 @@ export default function Results() {
                     <Cloud className="h-4 w-4" />
                     Tipo de Evento
                   </p>
-                  <p className="font-semibold text-lg">{perfil.emoji} {perfil.name}</p>
+                  <p className="font-semibold text-lg">{perfil.name}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
