@@ -65,7 +65,14 @@
   },
   "buttons": {
     "editAnalysis": "Edit Analysis",
-    "newAnalysis": "New Analysis"
+    "newAnalysis": "New Analysis",
+    "share": "Share Result"
+  },
+  "share": {
+    "title": "Share Result",
+    "message": "Check out this weather analysis: {{eventName}} in {{location}}",
+    "copied": "Link copied!",
+    "error": "Error sharing"
   },
   "methodology": {
     "title": "How do we calculate these percentages?",

@@ -65,7 +65,14 @@
   },
   "buttons": {
     "editAnalysis": "Editar Análise",
-    "newAnalysis": "Nova Análise"
+    "newAnalysis": "Nova Análise",
+    "share": "Compartilhar Resultado"
+  },
+  "share": {
+    "title": "Compartilhar Resultado",
+    "message": "Confira a análise climática: {{eventName}} em {{location}}",
+    "copied": "Link copiado!",
+    "error": "Erro ao compartilhar"
   },
   "methodology": {
     "title": "Como calculamos essas porcentagens?",

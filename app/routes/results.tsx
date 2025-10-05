@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
-import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, TrendingUp, Sparkles, RefreshCw, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { EventProfileService } from "~/lib/services/event-profiles.service";
@@ -15,6 +15,7 @@ import { WeatherAnalysisService } from "~/lib/services/weather-analysis.service"
 import { DateSuggestionsService } from "~/lib/services/date-suggestions.service";
 import { ProbabilityFormatterService } from "~/lib/services/probability-formatter.service";
 import { useTranslation } from "~/i18n/useTranslation";
+import { useToast } from "~/components/toast-provider";
 import type { DayAnalysis } from "~/lib/types/weather.types";
 import type { Route } from "./+types/results";
 
@@ -31,6 +32,7 @@ export default function Results() {
   const { t, i18n } = useTranslation('results');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const currentLocale = i18n.language === 'en-US' ? enUS : ptBR;
 
@@ -176,6 +178,34 @@ export default function Results() {
     }
   };
 
+  const handleShare = async () => {
+    const currentUrl = window.location.href;
+    const shareData = {
+      title: t('share.title'),
+      text: t('share.message', {
+        eventName: perfil.name,
+        location: locationName || `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`
+      }),
+      url: currentUrl
+    };
+
+    try {
+      // Try to use Web Share API if available
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(currentUrl);
+        showToast(t('share.copied'), 'success');
+      }
+    } catch (error) {
+      // If user cancels share or any other error
+      if (error instanceof Error && error.name !== 'AbortError') {
+        console.error('Error sharing:', error);
+        showToast(t('share.error'), 'destructive');
+      }
+    }
+  };
 
   if (!latitude || !longitude || !dataInicio || !dataFim) {
     return (
@@ -602,9 +632,13 @@ export default function Results() {
         {!loading && (
           <div className="fixed bottom-0 left-0 right-0 p-3 bg-background border-t shadow-lg z-[1000]">
             <div className="max-w-6xl mx-auto flex gap-2">
-              <Button variant="outline" className="flex-1 h-10" onClick={() => navigate(-1)}>
+              <Button variant="outline" className="h-10" onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {t('buttons.editAnalysis')}
+              </Button>
+              <Button variant="outline" className="h-10" onClick={handleShare}>
+                <Share2 className="h-4 w-4 mr-2" />
+                {t('buttons.share')}
               </Button>
               <Link to="/" className="flex-1">
                 <Button className="w-full h-10">
