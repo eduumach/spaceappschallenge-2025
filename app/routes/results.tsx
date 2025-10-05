@@ -44,85 +44,111 @@ interface PerfilEvento {
 
 const perfisEventos: Record<string, PerfilEvento> = {
   praia: {
-    nome: 'Dia de Praia',
+    nome: 'Praia',
     emoji: '🏖️',
-    descricao: 'Dia ensolarado, quente, sem chuva e vento moderado',
+    descricao: 'Sol forte, calor intenso, céu limpo',
     criterios: {
-      temp_min_ideal: 25,
-      temp_max_ideal: 35,
-      precipitacao_max: 2,
-      vento_max: 8,
-      umidade_max: 75
+      temp_min_ideal: 28,
+      temp_max_ideal: 42,
+      precipitacao_max: 1,
+      vento_max: 10,
+      umidade_max: 80
     }
   },
   churrasco: {
-    nome: 'Churrasco ao Ar Livre',
+    nome: 'Churrasco',
     emoji: '🍖',
-    descricao: 'Sem chuva, temperatura agradável',
-    criterios: {
-      temp_min_ideal: 18,
-      temp_max_ideal: 32,
-      precipitacao_max: 1,
-      vento_max: 12
-    }
-  },
-  casamento: {
-    nome: 'Casamento ao Ar Livre',
-    emoji: '💒',
-    descricao: 'Clima perfeito, sem chuva, vento leve',
+    descricao: 'Sem chuva, calor ou clima agradável',
     criterios: {
       temp_min_ideal: 20,
-      temp_max_ideal: 28,
-      precipitacao_max: 0.5,
-      vento_max: 6,
-      umidade_min: 40,
-      umidade_max: 70
+      temp_max_ideal: 38,
+      precipitacao_max: 2,
+      vento_max: 15
     }
   },
-  trilha: {
-    nome: 'Trilha/Caminhada',
-    emoji: '🥾',
-    descricao: 'Temperatura amena, pode ter chuva leve',
+  pelada: {
+    nome: 'Pelada/Futebol',
+    emoji: '⚽',
+    descricao: 'Brasileiro joga bola em qualquer calor!',
     criterios: {
-      temp_min_ideal: 15,
-      temp_max_ideal: 28,
+      temp_min_ideal: 20,
+      temp_max_ideal: 38,
       precipitacao_max: 3,
       vento_max: 15
     }
   },
-  corrida: {
-    nome: 'Corrida/Maratona',
-    emoji: '🏃',
-    descricao: 'Clima fresco, sem chuva',
+  festa_junina: {
+    nome: 'Festa Junina',
+    emoji: '🌽',
+    descricao: 'Clima de inverno brasileiro (fresquinho à noite)',
     criterios: {
-      temp_min_ideal: 12,
-      temp_max_ideal: 22,
+      temp_min_ideal: 16,
+      temp_max_ideal: 28,
       precipitacao_max: 1,
-      vento_max: 10
-    }
-  },
-  cena_chuva: {
-    nome: 'Cena de Filme com Chuva',
-    emoji: '🎬',
-    descricao: 'Precisa de chuva para a cena!',
-    criterios: {
-      temp_min_ideal: 15,
-      temp_max_ideal: 30,
-      precipitacao_min: 5,
-      precipitacao_max: 50,
-      vento_max: 15
-    }
-  },
-  observacao_estrelas: {
-    nome: 'Observação de Estrelas',
-    emoji: '🌟',
-    descricao: 'Céu limpo, sem chuva, baixa umidade',
-    criterios: {
-      temp_min_ideal: 10,
-      temp_max_ideal: 25,
-      precipitacao_max: 0,
       vento_max: 12,
+      umidade_min: 35,
       umidade_max: 65
+    }
+  },
+  samba_pagode: {
+    nome: 'Samba/Pagode ao Ar Livre',
+    emoji: '🎵',
+    descricao: 'Clima quente e animado para curtir',
+    criterios: {
+      temp_min_ideal: 24,
+      temp_max_ideal: 36,
+      precipitacao_max: 2,
+      vento_max: 12,
+      umidade_max: 80
+    }
+  },
+  carnaval: {
+    nome: 'Carnaval de Rua',
+    emoji: '🎉',
+    descricao: 'Calor ABSURDO de verão brasileiro!',
+    criterios: {
+      temp_min_ideal: 30,
+      temp_max_ideal: 42,
+      precipitacao_max: 5,
+      vento_max: 15,
+      umidade_min: 55,
+      umidade_max: 90
+    }
+  },
+  volei_praia: {
+    nome: 'Vôlei de Praia',
+    emoji: '🏐',
+    descricao: 'Areia quente, sol a pino',
+    criterios: {
+      temp_min_ideal: 28,
+      temp_max_ideal: 40,
+      precipitacao_max: 1,
+      vento_max: 10,
+      umidade_max: 75
+    }
+  },
+  pescaria: {
+    nome: 'Pescaria',
+    emoji: '🎣',
+    descricao: 'Manhã tranquila, temperatura moderada',
+    criterios: {
+      temp_min_ideal: 20,
+      temp_max_ideal: 32,
+      precipitacao_max: 2,
+      vento_max: 12
+    }
+  },
+  piquenique: {
+    nome: 'Piquenique no Parque',
+    emoji: '🧺',
+    descricao: 'Dia agradável sem calor extremo',
+    criterios: {
+      temp_min_ideal: 22,
+      temp_max_ideal: 30,
+      precipitacao_max: 0.5,
+      vento_max: 10,
+      umidade_min: 40,
+      umidade_max: 70
     }
   }
 };
@@ -135,6 +161,9 @@ interface DayAnalysis {
   totalAnos: number;
   detalhes: any[];
   dadosHistoricos: WeatherData[];
+  probabilidadeRecente: number; // últimos 10 anos
+  anosIdeaisRecente: number;
+  totalAnosRecente: number;
 }
 
 export default function Results() {
@@ -151,6 +180,7 @@ export default function Results() {
   const [resultado, setResultado] = useState<DayAnalysis[]>([]);
   const [melhorDia, setMelhorDia] = useState<DayAnalysis | null>(null);
   const [erro, setErro] = useState(false);
+  const [sugestoesAlternativas, setSugestoesAlternativas] = useState<DayAnalysis[]>([]);
 
   const perfil = perfisEventos[perfilKey];
 
@@ -165,17 +195,29 @@ export default function Results() {
     setErro(false);
 
     try {
-      // Gerar lista de dias no range
+      // Gerar lista de dias no range selecionado pelo usuário
       const inicio = new Date(dataInicio);
       const fim = new Date(dataFim);
-      const diasParaAnalisar: Date[] = [];
+      const diasSelecionados: Date[] = [];
 
       for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
+        diasSelecionados.push(new Date(d));
+      }
+
+      // Expandir range para ±30 dias para buscar sugestões
+      const diasExpandir = 30;
+      const inicioExpandido = new Date(inicio);
+      inicioExpandido.setDate(inicioExpandido.getDate() - diasExpandir);
+      const fimExpandido = new Date(fim);
+      fimExpandido.setDate(fimExpandido.getDate() + diasExpandir);
+
+      const diasParaAnalisar: Date[] = [];
+      for (let d = new Date(inicioExpandido); d <= fimExpandido; d.setDate(d.getDate() + 1)) {
         diasParaAnalisar.push(new Date(d));
       }
 
       const anoAtual = new Date().getFullYear();
-      const anosPassado = 30;
+      const anosPassado = 20;
       const anoInicio = anoAtual - anosPassado;
 
       // Mapa para agrupar dados históricos por dia/mês (chave: MMDD)
@@ -187,18 +229,18 @@ export default function Results() {
         dadosPorDia.set(chave, []);
       });
 
-      // Calcular range de datas (formato YYYYMMDD)
-      const mesInicio = (inicio.getMonth() + 1).toString().padStart(2, '0');
-      const diaInicioStr = inicio.getDate().toString().padStart(2, '0');
-      const mesFim = (fim.getMonth() + 1).toString().padStart(2, '0');
-      const diaFimStr = fim.getDate().toString().padStart(2, '0');
+      // Calcular range de datas expandido (formato YYYYMMDD)
+      const mesInicioExp = (inicioExpandido.getMonth() + 1).toString().padStart(2, '0');
+      const diaInicioExpStr = inicioExpandido.getDate().toString().padStart(2, '0');
+      const mesFimExp = (fimExpandido.getMonth() + 1).toString().padStart(2, '0');
+      const diaFimExpStr = fimExpandido.getDate().toString().padStart(2, '0');
 
-      // Para cada ano histórico, buscar dados do range completo
+      // Para cada ano histórico, buscar dados do range completo expandido
       const todasPromessas = [];
 
       for (let ano = anoInicio; ano < anoAtual; ano++) {
-        const startDate = `${ano}${mesInicio}${diaInicioStr}`;
-        const endDate = `${ano}${mesFim}${diaFimStr}`;
+        const startDate = `${ano}${mesInicioExp}${diaInicioExpStr}`;
+        const endDate = `${ano}${mesFimExp}${diaFimExpStr}`;
 
         const params = new URLSearchParams({
           start: startDate,
@@ -245,6 +287,7 @@ export default function Results() {
 
       // Analisar cada dia com seus dados históricos agrupados
       const analisesPorDia: DayAnalysis[] = [];
+      const todasAnalises: DayAnalysis[] = [];
 
       diasParaAnalisar.forEach(diaAtual => {
         const chave = `${(diaAtual.getMonth() + 1).toString().padStart(2, '0')}${diaAtual.getDate().toString().padStart(2, '0')}`;
@@ -252,7 +295,16 @@ export default function Results() {
 
         if (dadosHistoricos.length > 0) {
           const analise = analisarDados(dadosHistoricos, diaAtual);
-          analisesPorDia.push(analise);
+          todasAnalises.push(analise);
+
+          // Verificar se está no range selecionado
+          const isDentroRange = diasSelecionados.some(d =>
+            d.getMonth() === diaAtual.getMonth() && d.getDate() === diaAtual.getDate()
+          );
+
+          if (isDentroRange) {
+            analisesPorDia.push(analise);
+          }
         }
       });
 
@@ -264,11 +316,35 @@ export default function Results() {
 
       setResultado(analisesPorDia);
 
-      // Determinar o melhor dia
+      // Determinar o melhor dia do período selecionado
       const melhor = analisesPorDia.reduce((prev, current) =>
         current.probabilidade > prev.probabilidade ? current : prev
       );
       setMelhorDia(melhor);
+
+      // Encontrar sugestões de dias melhores próximos (fora do range selecionado)
+      const diasAlternativos = todasAnalises
+        .filter(dia => {
+          // Excluir dias do range selecionado
+          const isDentroRange = diasSelecionados.some(d =>
+            d.getMonth() === dia.data.getMonth() && d.getDate() === dia.data.getDate()
+          );
+          return !isDentroRange;
+        })
+        .filter(dia => dia.probabilidade > melhor.probabilidade) // Só mostrar se for melhor
+        .sort((a, b) => {
+          // Ordenar por probabilidade (maior primeiro)
+          if (b.probabilidade !== a.probabilidade) {
+            return b.probabilidade - a.probabilidade;
+          }
+          // Se probabilidades iguais, ordenar por proximidade temporal
+          const distA = Math.abs(a.data.getTime() - inicio.getTime());
+          const distB = Math.abs(b.data.getTime() - inicio.getTime());
+          return distA - distB;
+        })
+        .slice(0, 5); // Top 5 sugestões
+
+      setSugestoesAlternativas(diasAlternativos);
 
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
@@ -282,7 +358,11 @@ export default function Results() {
     const criterios = perfil.criterios;
 
     let anosIdeais = 0;
+    let anosIdeaisRecente = 0;
     const detalhes: any[] = [];
+
+    const anoAtual = new Date().getFullYear();
+    const anoLimiteRecente = anoAtual - 10; // últimos 10 anos
 
     dados.forEach(d => {
       let ideal = true;
@@ -323,7 +403,12 @@ export default function Results() {
         motivos.push(`muito úmido (${d.umidade.toFixed(1)}%)`);
       }
 
-      if (ideal) anosIdeais++;
+      if (ideal) {
+        anosIdeais++;
+        if (d.ano >= anoLimiteRecente) {
+          anosIdeaisRecente++;
+        }
+      }
 
       detalhes.push({
         ...d,
@@ -332,7 +417,11 @@ export default function Results() {
       });
     });
 
+    const dadosRecentes = dados.filter(d => d.ano >= anoLimiteRecente);
     const probabilidade = (anosIdeais / dados.length) * 100;
+    const probabilidadeRecente = dadosRecentes.length > 0
+      ? (anosIdeaisRecente / dadosRecentes.length) * 100
+      : 0;
 
     return {
       data,
@@ -341,7 +430,10 @@ export default function Results() {
       anosIdeais,
       totalAnos: dados.length,
       detalhes,
-      dadosHistoricos: dados
+      dadosHistoricos: dados,
+      probabilidadeRecente,
+      anosIdeaisRecente,
+      totalAnosRecente: dadosRecentes.length
     };
   };
 
@@ -455,7 +547,7 @@ export default function Results() {
             <CardContent className="p-12">
               <div className="flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-                <p className="text-lg font-medium">Analisando 30 anos de dados históricos da NASA...</p>
+                <p className="text-lg font-medium">Analisando 20 anos de dados históricos da NASA...</p>
                 <p className="text-sm text-muted-foreground">Isso pode levar alguns segundos</p>
               </div>
             </CardContent>
@@ -510,6 +602,129 @@ export default function Results() {
           </Card>
         )}
 
+        {/* Sugestões de Datas Alternativas */}
+        {sugestoesAlternativas.length > 0 && !loading && (
+          <Card className="border-4 border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-amber-900 dark:text-amber-100">
+                💡 Sugestão: Datas Próximas com Melhor Clima
+              </CardTitle>
+              <CardDescription className="text-amber-700 dark:text-amber-300">
+                Encontramos datas próximas (±30 dias) com probabilidade MAIOR de clima ideal para seu evento!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {sugestoesAlternativas.map((dia, index) => {
+                  const diferencaDias = Math.round((dia.data.getTime() - new Date(dataInicio).getTime()) / (1000 * 60 * 60 * 24));
+                  const textoProximidade = diferencaDias > 0
+                    ? `${diferencaDias} dias depois`
+                    : `${Math.abs(diferencaDias)} dias antes`;
+
+                  return (
+                    <div
+                      key={dia.dataStr}
+                      className={`p-4 rounded-lg border-2 ${getBgProbabilidade(dia.probabilidade)} shadow-md`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">
+                            {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '⭐'}
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg">{dia.dataStr}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {textoProximidade} da data selecionada
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`text-3xl font-bold ${getCorProbabilidade(dia.probabilidade)}`}>
+                            {dia.probabilidade.toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {dia.anosIdeais} de {dia.totalAnos} anos
+                          </div>
+                          <Badge variant="outline" className="mt-1 text-xs bg-green-100 dark:bg-green-900">
+                            +{(dia.probabilidade - (melhorDia?.probabilidade || 0)).toFixed(1)}% melhor
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Análise Comparativa: Últimos 10 vs 20 Anos */}
+        {melhorDia && !loading && (
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <TrendingUp className="h-5 w-5 text-purple-600" />
+                Tendência Climática
+              </CardTitle>
+              <CardDescription>
+                Comparação entre dados recentes (últimos 10 anos) vs histórico completo (20 anos)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Últimos 10 anos */}
+                <div className={`p-6 rounded-lg border-2 ${getBgProbabilidade(melhorDia.probabilidadeRecente)}`}>
+                  <div className="text-center space-y-3">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      📅 Últimos 10 Anos (2015-2024)
+                    </div>
+                    <div className={`text-4xl font-bold ${getCorProbabilidade(melhorDia.probabilidadeRecente)}`}>
+                      {melhorDia.probabilidadeRecente.toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {melhorDia.anosIdeaisRecente} de {melhorDia.totalAnosRecente} anos com clima ideal
+                    </div>
+                  </div>
+                </div>
+
+                {/* 20 anos completos */}
+                <div className={`p-6 rounded-lg border-2 ${getBgProbabilidade(melhorDia.probabilidade)}`}>
+                  <div className="text-center space-y-3">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      📊 Histórico Completo (20 anos)
+                    </div>
+                    <div className={`text-4xl font-bold ${getCorProbabilidade(melhorDia.probabilidade)}`}>
+                      {melhorDia.probabilidade.toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {melhorDia.anosIdeais} de {melhorDia.totalAnos} anos com clima ideal
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Interpretação da tendência */}
+              <div className="mt-4 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                <div className="text-sm">
+                  {melhorDia.probabilidadeRecente > melhorDia.probabilidade + 10 ? (
+                    <p className="text-green-700 dark:text-green-300 font-medium">
+                      📈 <strong>Tendência positiva!</strong> O clima está {(melhorDia.probabilidadeRecente - melhorDia.probabilidade).toFixed(1)}% mais favorável nos últimos anos.
+                    </p>
+                  ) : melhorDia.probabilidadeRecente < melhorDia.probabilidade - 10 ? (
+                    <p className="text-orange-700 dark:text-orange-300 font-medium">
+                      📉 <strong>Tendência negativa.</strong> O clima está {(melhorDia.probabilidade - melhorDia.probabilidadeRecente).toFixed(1)}% menos favorável nos últimos anos.
+                    </p>
+                  ) : (
+                    <p className="text-blue-700 dark:text-blue-300 font-medium">
+                      ➡️ <strong>Clima estável.</strong> Não há mudança significativa entre os períodos recentes e históricos.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Comparação de Dias */}
         {resultado.length > 0 && !loading && (
           <Card className="border-2">
@@ -519,7 +734,7 @@ export default function Results() {
                 Comparação de Todos os Dias
               </CardTitle>
               <CardDescription>
-                Probabilidade de clima ideal para cada dia do período (baseado em 30 anos de dados)
+                Probabilidade de clima ideal para cada dia do período (baseado em 20 anos de dados)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -550,7 +765,10 @@ export default function Results() {
                           {dia.probabilidade.toFixed(1)}%
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {dia.anosIdeais} de {dia.totalAnos} anos
+                          {dia.anosIdeais} de {dia.totalAnos} anos (20 anos)
+                        </div>
+                        <div className={`text-sm font-semibold mt-1 ${getCorProbabilidade(dia.probabilidadeRecente)}`}>
+                          {dia.probabilidadeRecente.toFixed(0)}% últimos 10
                         </div>
                       </div>
                     </div>

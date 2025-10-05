@@ -27,39 +27,54 @@ interface PerfilEvento {
 
 const perfisEventos: Record<string, PerfilEvento> = {
   praia: {
-    nome: 'Dia de Praia',
+    nome: 'Praia',
     emoji: '🏖️',
-    descricao: 'Dia ensolarado, quente, sem chuva e vento moderado'
+    descricao: 'Sol forte, calor intenso, céu limpo'
   },
   churrasco: {
-    nome: 'Churrasco ao Ar Livre',
+    nome: 'Churrasco',
     emoji: '🍖',
-    descricao: 'Sem chuva, temperatura agradável'
+    descricao: 'Sem chuva, calor ou clima agradável'
   },
-  casamento: {
-    nome: 'Casamento ao Ar Livre',
-    emoji: '💒',
-    descricao: 'Clima perfeito, sem chuva, vento leve'
+  pelada: {
+    nome: 'Pelada/Futebol',
+    emoji: '⚽',
+    descricao: 'Brasileiro joga bola em qualquer calor!'
+  },
+  festa_junina: {
+    nome: 'Festa Junina',
+    emoji: '🌽',
+    descricao: 'Clima de inverno brasileiro, fresquinho à noite'
+  },
+  samba_pagode: {
+    nome: 'Samba/Pagode ao Ar Livre',
+    emoji: '🎵',
+    descricao: 'Clima quente e animado para curtir'
+  },
+  carnaval: {
+    nome: 'Carnaval de Rua',
+    emoji: '🎉',
+    descricao: 'Calor ABSURDO de verão brasileiro!'
+  },
+  volei_praia: {
+    nome: 'Vôlei de Praia',
+    emoji: '🏐',
+    descricao: 'Areia quente, sol a pino'
+  },
+  pescaria: {
+    nome: 'Pescaria',
+    emoji: '🎣',
+    descricao: 'Manhã tranquila, temperatura moderada'
+  },
+  piquenique: {
+    nome: 'Piquenique no Parque',
+    emoji: '🧺',
+    descricao: 'Dia agradável sem calor extremo'
   },
   trilha: {
     nome: 'Trilha/Caminhada',
     emoji: '🥾',
-    descricao: 'Temperatura amena, pode ter chuva leve'
-  },
-  corrida: {
-    nome: 'Corrida/Maratona',
-    emoji: '🏃',
-    descricao: 'Clima fresco, sem chuva'
-  },
-  cena_chuva: {
-    nome: 'Cena de Filme com Chuva',
-    emoji: '🎬',
-    descricao: 'Precisa de chuva para a cena!'
-  },
-  observacao_estrelas: {
-    nome: 'Observação de Estrelas',
-    emoji: '🌟',
-    descricao: 'Céu limpo, sem chuva, baixa umidade'
+    descricao: 'Clima ameno, pode ter chuva leve na mata'
   }
 };
 
