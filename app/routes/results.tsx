@@ -7,6 +7,12 @@ import { Badge } from "~/components/ui/badge";
 import { ArrowLeft, MapPin, Calendar, Cloud, CheckCircle, AlertCircle, Loader2, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { EventProfileService } from "~/lib/services/event-profiles.service";
+import { NASADataFetcherService } from "~/lib/services/nasa-data-fetcher.service";
+import { WeatherAnalysisService } from "~/lib/services/weather-analysis.service";
+import { DateSuggestionsService } from "~/lib/services/date-suggestions.service";
+import { ProbabilityFormatterService } from "~/lib/services/probability-formatter.service";
+import type { DayAnalysis } from "~/lib/types/weather.types";
 import type { Route } from "./+types/results";
 
 export function meta({}: Route.MetaArgs) {
@@ -16,126 +22,6 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-interface WeatherData {
-  ano: number;
-  temp_max: number;
-  temp_min: number;
-  precipitacao: number;
-  vento: number;
-  umidade: number;
-}
-
-interface Criterios {
-  temp_min_ideal?: number;
-  temp_max_ideal?: number;
-  precipitacao_min?: number;
-  precipitacao_max?: number;
-  vento_max?: number;
-  umidade_min?: number;
-  umidade_max?: number;
-}
-
-interface PerfilEvento {
-  nome: string;
-  emoji: string;
-  descricao: string;
-  criterios: Criterios;
-}
-
-const perfisEventos: Record<string, PerfilEvento> = {
-  praia: {
-    nome: 'Dia de Praia',
-    emoji: '🏖️',
-    descricao: 'Dia ensolarado, quente, sem chuva e vento moderado',
-    criterios: {
-      temp_min_ideal: 25,
-      temp_max_ideal: 35,
-      precipitacao_max: 2,
-      vento_max: 8,
-      umidade_max: 75
-    }
-  },
-  churrasco: {
-    nome: 'Churrasco ao Ar Livre',
-    emoji: '🍖',
-    descricao: 'Sem chuva, temperatura agradável',
-    criterios: {
-      temp_min_ideal: 18,
-      temp_max_ideal: 32,
-      precipitacao_max: 1,
-      vento_max: 12
-    }
-  },
-  casamento: {
-    nome: 'Casamento ao Ar Livre',
-    emoji: '💒',
-    descricao: 'Clima perfeito, sem chuva, vento leve',
-    criterios: {
-      temp_min_ideal: 20,
-      temp_max_ideal: 28,
-      precipitacao_max: 0.5,
-      vento_max: 6,
-      umidade_min: 40,
-      umidade_max: 70
-    }
-  },
-  trilha: {
-    nome: 'Trilha/Caminhada',
-    emoji: '🥾',
-    descricao: 'Temperatura amena, pode ter chuva leve',
-    criterios: {
-      temp_min_ideal: 15,
-      temp_max_ideal: 28,
-      precipitacao_max: 3,
-      vento_max: 15
-    }
-  },
-  corrida: {
-    nome: 'Corrida/Maratona',
-    emoji: '🏃',
-    descricao: 'Clima fresco, sem chuva',
-    criterios: {
-      temp_min_ideal: 12,
-      temp_max_ideal: 22,
-      precipitacao_max: 1,
-      vento_max: 10
-    }
-  },
-  cena_chuva: {
-    nome: 'Cena de Filme com Chuva',
-    emoji: '🎬',
-    descricao: 'Precisa de chuva para a cena!',
-    criterios: {
-      temp_min_ideal: 15,
-      temp_max_ideal: 30,
-      precipitacao_min: 5,
-      precipitacao_max: 50,
-      vento_max: 15
-    }
-  },
-  observacao_estrelas: {
-    nome: 'Observação de Estrelas',
-    emoji: '🌟',
-    descricao: 'Céu limpo, sem chuva, baixa umidade',
-    criterios: {
-      temp_min_ideal: 10,
-      temp_max_ideal: 25,
-      precipitacao_max: 0,
-      vento_max: 12,
-      umidade_max: 65
-    }
-  }
-};
-
-interface DayAnalysis {
-  data: Date;
-  dataStr: string;
-  probabilidade: number;
-  anosIdeais: number;
-  totalAnos: number;
-  detalhes: any[];
-  dadosHistoricos: WeatherData[];
-}
 
 export default function Results() {
   const [searchParams] = useSearchParams();
@@ -151,8 +37,28 @@ export default function Results() {
   const [resultado, setResultado] = useState<DayAnalysis[]>([]);
   const [melhorDia, setMelhorDia] = useState<DayAnalysis | null>(null);
   const [erro, setErro] = useState(false);
+  const [sugestoesAlternativas, setSugestoesAlternativas] = useState<DayAnalysis[]>([]);
 
-  const perfil = perfisEventos[perfilKey];
+  const perfil = EventProfileService.getProfile(perfilKey);
+
+  if (!perfil) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-6">
+        <div className="max-w-4xl mx-auto text-center pt-20">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Erro: Perfil de evento inválido</h1>
+          <p className="text-muted-foreground mb-6">
+            O tipo de evento selecionado não foi encontrado.
+          </p>
+          <Link to="/">
+            <Button>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar ao Início
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (latitude && longitude && dataInicio && dataFim) {
@@ -165,110 +71,64 @@ export default function Results() {
     setErro(false);
 
     try {
-      // Gerar lista de dias no range
-      const inicio = new Date(dataInicio);
-      const fim = new Date(dataFim);
-      const diasParaAnalisar: Date[] = [];
+      const startDate = new Date(dataInicio);
+      const endDate = new Date(dataFim);
 
-      for (let d = new Date(inicio); d <= fim; d.setDate(d.getDate() + 1)) {
-        diasParaAnalisar.push(new Date(d));
-      }
-
-      const anoAtual = new Date().getFullYear();
-      const anosPassado = 30;
-      const anoInicio = anoAtual - anosPassado;
-
-      // Mapa para agrupar dados históricos por dia/mês (chave: MMDD)
-      const dadosPorDia = new Map<string, WeatherData[]>();
-
-      // Inicializar o mapa com arrays vazios para cada dia
-      diasParaAnalisar.forEach(dia => {
-        const chave = `${(dia.getMonth() + 1).toString().padStart(2, '0')}${dia.getDate().toString().padStart(2, '0')}`;
-        dadosPorDia.set(chave, []);
+      // Fetch historical data using the service
+      const fetchResult = await NASADataFetcherService.fetchHistoricalData({
+        latitude,
+        longitude,
+        startDate,
+        endDate,
+        expansionDays: 30
       });
 
-      // Calcular range de datas (formato YYYYMMDD)
-      const mesInicio = (inicio.getMonth() + 1).toString().padStart(2, '0');
-      const diaInicioStr = inicio.getDate().toString().padStart(2, '0');
-      const mesFim = (fim.getMonth() + 1).toString().padStart(2, '0');
-      const diaFimStr = fim.getDate().toString().padStart(2, '0');
+      const { dataByDay, selectedDays, allDays } = fetchResult;
 
-      // Para cada ano histórico, buscar dados do range completo
-      const todasPromessas = [];
+      // Analyze each day
+      const selectedAnalyses: DayAnalysis[] = [];
+      const allAnalyses: DayAnalysis[] = [];
 
-      for (let ano = anoInicio; ano < anoAtual; ano++) {
-        const startDate = `${ano}${mesInicio}${diaInicioStr}`;
-        const endDate = `${ano}${mesFim}${diaFimStr}`;
+      allDays.forEach(day => {
+        const dayKey = `${(day.getMonth() + 1).toString().padStart(2, '0')}${day.getDate().toString().padStart(2, '0')}`;
+        const historicalData = dataByDay.get(dayKey) || [];
 
-        const params = new URLSearchParams({
-          start: startDate,
-          end: endDate,
-          latitude: latitude.toString(),
-          longitude: longitude.toString(),
-          community: 'ag',
-          parameters: 'T2M_MAX,T2M_MIN,PRECTOTCORR,WS10M,RH2M',
-          format: 'json'
-        });
+        if (historicalData.length > 0) {
+          const analysis = WeatherAnalysisService.analyzeDay(
+            historicalData,
+            day,
+            perfil.criteria
+          );
+          allAnalyses.push(analysis);
 
-        todasPromessas.push(
-          fetch(`https://power.larc.nasa.gov/api/temporal/daily/point?${params}`)
-            .then(res => res.json())
-            .then(data => {
-              if (data?.properties?.parameter) {
-                const p = data.properties.parameter;
-
-                // Processar cada dia retornado no range
-                const datas = Object.keys(p.T2M_MAX || {});
-                datas.forEach(dateStr => {
-                  // Extrair mês/dia da data (formato YYYYMMDD -> MMDD)
-                  const mmdd = dateStr.substring(4, 8);
-
-                  if (dadosPorDia.has(mmdd)) {
-                    dadosPorDia.get(mmdd)?.push({
-                      ano,
-                      temp_max: p.T2M_MAX?.[dateStr] ?? NaN,
-                      temp_min: p.T2M_MIN?.[dateStr] ?? NaN,
-                      precipitacao: p.PRECTOTCORR?.[dateStr] ?? NaN,
-                      vento: p.WS10M?.[dateStr] ?? NaN,
-                      umidade: p.RH2M?.[dateStr] ?? NaN
-                    });
-                  }
-                });
-              }
-              return ano;
-            })
-            .catch(() => null)
-        );
-      }
-
-      await Promise.all(todasPromessas);
-
-      // Analisar cada dia com seus dados históricos agrupados
-      const analisesPorDia: DayAnalysis[] = [];
-
-      diasParaAnalisar.forEach(diaAtual => {
-        const chave = `${(diaAtual.getMonth() + 1).toString().padStart(2, '0')}${diaAtual.getDate().toString().padStart(2, '0')}`;
-        const dadosHistoricos = dadosPorDia.get(chave) || [];
-
-        if (dadosHistoricos.length > 0) {
-          const analise = analisarDados(dadosHistoricos, diaAtual);
-          analisesPorDia.push(analise);
+          // Check if day is in selected range
+          if (NASADataFetcherService.isDateInRange(day, selectedDays)) {
+            selectedAnalyses.push(analysis);
+          }
         }
       });
 
-      if (analisesPorDia.length === 0) {
+      if (selectedAnalyses.length === 0) {
         setErro(true);
         setLoading(false);
         return;
       }
 
-      setResultado(analisesPorDia);
+      setResultado(selectedAnalyses);
 
-      // Determinar o melhor dia
-      const melhor = analisesPorDia.reduce((prev, current) =>
-        current.probabilidade > prev.probabilidade ? current : prev
+      // Find best day in selected range
+      const bestDay = WeatherAnalysisService.findBestDay(selectedAnalyses);
+      setMelhorDia(bestDay);
+
+      // Find alternative suggestions
+      const suggestions = DateSuggestionsService.findAlternativeDates(
+        allAnalyses,
+        selectedAnalyses,
+        bestDay,
+        startDate,
+        { maxSuggestions: 5 }
       );
-      setMelhorDia(melhor);
+      setSugestoesAlternativas(suggestions);
 
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
@@ -278,96 +138,6 @@ export default function Results() {
     }
   };
 
-  const analisarDados = (dados: WeatherData[], data: Date): DayAnalysis => {
-    const criterios = perfil.criterios;
-
-    let anosIdeais = 0;
-    const detalhes: any[] = [];
-
-    dados.forEach(d => {
-      let ideal = true;
-      const motivos: string[] = [];
-
-      if (criterios.temp_min_ideal !== undefined && d.temp_min < criterios.temp_min_ideal) {
-        ideal = false;
-        motivos.push(`muito frio (${d.temp_min.toFixed(1)}°C)`);
-      }
-
-      if (criterios.temp_max_ideal !== undefined && d.temp_max > criterios.temp_max_ideal) {
-        ideal = false;
-        motivos.push(`muito quente (${d.temp_max.toFixed(1)}°C)`);
-      }
-
-      if (criterios.precipitacao_min !== undefined && d.precipitacao < criterios.precipitacao_min) {
-        ideal = false;
-        motivos.push(`chuva insuficiente (${d.precipitacao.toFixed(1)}mm)`);
-      }
-
-      if (criterios.precipitacao_max !== undefined && d.precipitacao > criterios.precipitacao_max) {
-        ideal = false;
-        motivos.push(`muita chuva (${d.precipitacao.toFixed(1)}mm)`);
-      }
-
-      if (criterios.vento_max !== undefined && d.vento > criterios.vento_max) {
-        ideal = false;
-        motivos.push(`muito vento (${d.vento.toFixed(1)}m/s)`);
-      }
-
-      if (criterios.umidade_min !== undefined && d.umidade < criterios.umidade_min) {
-        ideal = false;
-        motivos.push(`muito seco (${d.umidade.toFixed(1)}%)`);
-      }
-
-      if (criterios.umidade_max !== undefined && d.umidade > criterios.umidade_max) {
-        ideal = false;
-        motivos.push(`muito úmido (${d.umidade.toFixed(1)}%)`);
-      }
-
-      if (ideal) anosIdeais++;
-
-      detalhes.push({
-        ...d,
-        ideal,
-        motivos: motivos.join(', ') || 'OK'
-      });
-    });
-
-    const probabilidade = (anosIdeais / dados.length) * 100;
-
-    return {
-      data,
-      dataStr: format(data, "dd 'de' MMMM", { locale: ptBR }),
-      probabilidade,
-      anosIdeais,
-      totalAnos: dados.length,
-      detalhes,
-      dadosHistoricos: dados
-    };
-  };
-
-  const getCorProbabilidade = (prob: number) => {
-    if (prob >= 80) return 'text-green-600';
-    if (prob >= 60) return 'text-blue-600';
-    if (prob >= 40) return 'text-yellow-600';
-    if (prob >= 20) return 'text-orange-600';
-    return 'text-red-600';
-  };
-
-  const getBgProbabilidade = (prob: number) => {
-    if (prob >= 80) return 'bg-green-50 dark:bg-green-950/20 border-green-500';
-    if (prob >= 60) return 'bg-blue-50 dark:bg-blue-950/20 border-blue-500';
-    if (prob >= 40) return 'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-500';
-    if (prob >= 20) return 'bg-orange-50 dark:bg-orange-950/20 border-orange-500';
-    return 'bg-red-50 dark:bg-red-950/20 border-red-500';
-  };
-
-  const getMensagemProbabilidade = (prob: number) => {
-    if (prob >= 80) return '🌟 EXCELENTE! Altíssima probabilidade de clima perfeito!';
-    if (prob >= 60) return '👍 BOA probabilidade de clima favorável!';
-    if (prob >= 40) return '⚡ Probabilidade MODERADA - tenha um plano B!';
-    if (prob >= 20) return '⚠️ Probabilidade BAIXA - considere outra data!';
-    return '🚨 ALERTA! Muito improvável ter clima adequado!';
-  };
 
   if (!latitude || !longitude || !dataInicio || !dataFim) {
     return (
@@ -421,7 +191,7 @@ export default function Results() {
                   <Cloud className="h-4 w-4" />
                   Tipo de Evento
                 </p>
-                <p className="font-semibold text-lg">{perfil.emoji} {perfil.nome}</p>
+                <p className="font-semibold text-lg">{perfil.emoji} {perfil.name}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
@@ -455,7 +225,7 @@ export default function Results() {
             <CardContent className="p-12">
               <div className="flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-                <p className="text-lg font-medium">Analisando 30 anos de dados históricos da NASA...</p>
+                <p className="text-lg font-medium">Analisando 20 anos de dados históricos da NASA...</p>
                 <p className="text-sm text-muted-foreground">Isso pode levar alguns segundos</p>
               </div>
             </CardContent>
@@ -482,28 +252,145 @@ export default function Results() {
 
         {/* Melhor Dia - Destaque */}
         {melhorDia && !loading && (
-          <Card className={`border-4 ${getBgProbabilidade(melhorDia.probabilidade)}`}>
+          <Card className={`border-4 ${ProbabilityFormatterService.getBgColor(melhorDia.probability)}`}>
             <CardContent className="p-6 sm:p-8">
               <div className="text-center space-y-4">
                 <div className="text-lg font-semibold text-muted-foreground">
-                  {melhorDia.probabilidade === 0 ? '⚠️ Nenhum Dia Ideal Encontrado' : '🌟 Melhor Dia do Período'}
+                  {melhorDia.probability === 0 ? '⚠️ Nenhum Dia Ideal Encontrado' : '🌟 Melhor Dia do Período'}
                 </div>
                 <div className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-200">
-                  {melhorDia.dataStr}
+                  {melhorDia.dateStr}
                 </div>
-                <div className={`text-5xl sm:text-6xl font-bold ${getCorProbabilidade(melhorDia.probabilidade)}`}>
-                  {melhorDia.probabilidade.toFixed(1)}%
+                <div className={`text-5xl sm:text-6xl font-bold ${ProbabilityFormatterService.getTextColor(melhorDia.probability)}`}>
+                  {melhorDia.probability.toFixed(1)}%
                 </div>
                 <div className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200">
                   Probabilidade de Clima Ideal
                 </div>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Baseado em {melhorDia.totalAnos} anos de dados históricos ({melhorDia.anosIdeais} anos com clima ideal)
+                  Baseado em {melhorDia.totalYears} anos de dados históricos ({melhorDia.idealYears} anos com clima ideal)
                 </p>
                 <div className="pt-4">
                   <Badge variant="outline" className="text-base px-4 py-2">
-                    {getMensagemProbabilidade(melhorDia.probabilidade)}
+                    {ProbabilityFormatterService.getMessage(melhorDia.probability)}
                   </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Sugestões de Datas Alternativas */}
+        {sugestoesAlternativas.length > 0 && !loading && (
+          <Card className="border-4 border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-amber-900 dark:text-amber-100">
+                💡 Sugestão: Datas Próximas com Melhor Clima
+              </CardTitle>
+              <CardDescription className="text-amber-700 dark:text-amber-300">
+                Encontramos datas próximas (±30 dias) com probabilidade MAIOR de clima ideal para seu evento!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {sugestoesAlternativas.map((dia, index) => {
+                  const diferencaDias = DateSuggestionsService.calculateDaysDifference(dia.date, new Date(dataInicio));
+                  const textoProximidade = DateSuggestionsService.getProximityText(diferencaDias);
+
+                  return (
+                    <div
+                      key={dia.dateStr}
+                      className={`p-4 rounded-lg border-2 ${ProbabilityFormatterService.getBgColor(dia.probability)} shadow-md`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">
+                            {DateSuggestionsService.getRankEmoji(index)}
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg">{dia.dateStr}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {textoProximidade} da data selecionada
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`text-3xl font-bold ${ProbabilityFormatterService.getTextColor(dia.probability)}`}>
+                            {dia.probability.toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {dia.idealYears} de {dia.totalYears} anos
+                          </div>
+                          <Badge variant="outline" className="mt-1 text-xs bg-green-100 dark:bg-green-900">
+                            +{DateSuggestionsService.calculateImprovement(dia.probability, melhorDia?.probability || 0).toFixed(1)}% melhor
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Análise Comparativa: Últimos 10 vs 20 Anos */}
+        {melhorDia && !loading && (
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <TrendingUp className="h-5 w-5 text-purple-600" />
+                Tendência Climática
+              </CardTitle>
+              <CardDescription>
+                Comparação entre dados recentes (últimos 10 anos) vs histórico completo (20 anos)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Últimos 10 anos */}
+                <div className={`p-6 rounded-lg border-2 ${ProbabilityFormatterService.getBgColor(melhorDia.recentProbability)}`}>
+                  <div className="text-center space-y-3">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      📅 Últimos 10 Anos (2015-2024)
+                    </div>
+                    <div className={`text-4xl font-bold ${ProbabilityFormatterService.getTextColor(melhorDia.recentProbability)}`}>
+                      {melhorDia.recentProbability.toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {melhorDia.idealRecentYears} de {melhorDia.totalRecentYears} anos com clima ideal
+                    </div>
+                  </div>
+                </div>
+
+                {/* 20 anos completos */}
+                <div className={`p-6 rounded-lg border-2 ${ProbabilityFormatterService.getBgColor(melhorDia.probability)}`}>
+                  <div className="text-center space-y-3">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      📊 Histórico Completo (20 anos)
+                    </div>
+                    <div className={`text-4xl font-bold ${ProbabilityFormatterService.getTextColor(melhorDia.probability)}`}>
+                      {melhorDia.probability.toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {melhorDia.idealYears} de {melhorDia.totalYears} anos com clima ideal
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Interpretação da tendência */}
+              <div className="mt-4 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                <div className="text-sm">
+                  {(() => {
+                    const trend = WeatherAnalysisService.calculateTrend(melhorDia.recentProbability, melhorDia.probability);
+                    const trendMsg = ProbabilityFormatterService.getTrendMessage(trend.direction, trend.difference);
+                    return (
+                      <p className={`${trendMsg.color} font-medium`}>
+                        {trendMsg.emoji} <strong>{trendMsg.message.split('.')[0]}.</strong> {trendMsg.message.split('.').slice(1).join('.')}
+                      </p>
+                    );
+                  })()}
                 </div>
               </div>
             </CardContent>
@@ -519,17 +406,17 @@ export default function Results() {
                 Comparação de Todos os Dias
               </CardTitle>
               <CardDescription>
-                Probabilidade de clima ideal para cada dia do período (baseado em 30 anos de dados)
+                Probabilidade de clima ideal para cada dia do período (baseado em 20 anos de dados)
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {resultado.map((dia) => (
                   <div
-                    key={dia.dataStr}
+                    key={dia.dateStr}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       dia === melhorDia
-                        ? `${getBgProbabilidade(dia.probabilidade)} shadow-lg`
+                        ? `${ProbabilityFormatterService.getBgColor(dia.probability)} shadow-lg`
                         : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900'
                     }`}
                   >
@@ -537,7 +424,7 @@ export default function Results() {
                       <div className="flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-gray-500" />
                         <div>
-                          <div className="font-bold text-lg">{dia.dataStr}</div>
+                          <div className="font-bold text-lg">{dia.dateStr}</div>
                           {dia === melhorDia && (
                             <Badge variant="outline" className="mt-1 text-xs">
                               🌟 Melhor Dia
@@ -546,11 +433,14 @@ export default function Results() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className={`text-3xl font-bold ${getCorProbabilidade(dia.probabilidade)}`}>
-                          {dia.probabilidade.toFixed(1)}%
+                        <div className={`text-3xl font-bold ${ProbabilityFormatterService.getTextColor(dia.probability)}`}>
+                          {dia.probability.toFixed(1)}%
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {dia.anosIdeais} de {dia.totalAnos} anos
+                          {dia.idealYears} de {dia.totalYears} anos (20 anos)
+                        </div>
+                        <div className={`text-sm font-semibold mt-1 ${ProbabilityFormatterService.getTextColor(dia.recentProbability)}`}>
+                          {dia.recentProbability.toFixed(0)}% últimos 10
                         </div>
                       </div>
                     </div>
@@ -558,31 +448,31 @@ export default function Results() {
                       <div className="text-xs">
                         <span className="text-muted-foreground">Temp. Máx.</span>
                         <div className="font-semibold">
-                          {(dia.dadosHistoricos.reduce((s, d) => s + d.temp_max, 0) / dia.dadosHistoricos.length).toFixed(1)}°C
+                          {(dia.historicalData.reduce((s, d) => s + d.temp_max, 0) / dia.historicalData.length).toFixed(1)}°C
                         </div>
                       </div>
                       <div className="text-xs">
                         <span className="text-muted-foreground">Temp. Mín.</span>
                         <div className="font-semibold">
-                          {(dia.dadosHistoricos.reduce((s, d) => s + d.temp_min, 0) / dia.dadosHistoricos.length).toFixed(1)}°C
+                          {(dia.historicalData.reduce((s, d) => s + d.temp_min, 0) / dia.historicalData.length).toFixed(1)}°C
                         </div>
                       </div>
                       <div className="text-xs">
                         <span className="text-muted-foreground">Chuva</span>
                         <div className="font-semibold">
-                          {(dia.dadosHistoricos.reduce((s, d) => s + d.precipitacao, 0) / dia.dadosHistoricos.length).toFixed(1)}mm
+                          {(dia.historicalData.reduce((s, d) => s + d.precipitation, 0) / dia.historicalData.length).toFixed(1)}mm
                         </div>
                       </div>
                       <div className="text-xs">
                         <span className="text-muted-foreground">Vento</span>
                         <div className="font-semibold">
-                          {(dia.dadosHistoricos.reduce((s, d) => s + d.vento, 0) / dia.dadosHistoricos.length).toFixed(1)}m/s
+                          {(dia.historicalData.reduce((s, d) => s + d.wind, 0) / dia.historicalData.length).toFixed(1)}m/s
                         </div>
                       </div>
                       <div className="text-xs">
                         <span className="text-muted-foreground">Umidade</span>
                         <div className="font-semibold">
-                          {(dia.dadosHistoricos.reduce((s, d) => s + d.umidade, 0) / dia.dadosHistoricos.length).toFixed(1)}%
+                          {(dia.historicalData.reduce((s, d) => s + d.humidity, 0) / dia.historicalData.length).toFixed(1)}%
                         </div>
                       </div>
                     </div>
@@ -601,24 +491,24 @@ export default function Results() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <CheckCircle className="h-5 w-5 text-green-500" />
-                  Anos com Clima Ideal ({melhorDia.dataStr})
+                  Anos com Clima Ideal ({melhorDia.dateStr})
                 </CardTitle>
                 <CardDescription>Exemplos de anos favoráveis no melhor dia</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {melhorDia.detalhes.filter((d: any) => d.ideal).slice(0, 5).map((d: any) => (
-                    <div key={d.ano} className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                  {melhorDia.details.filter((d: any) => d.ideal).slice(0, 5).map((d: any) => (
+                    <div key={d.year} className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-green-800 dark:text-green-200">{d.ano}</span>
+                        <span className="font-bold text-green-800 dark:text-green-200">{d.year}</span>
                         <Badge variant="outline" className="text-xs bg-green-100 dark:bg-green-900">Ideal</Badge>
                       </div>
                       <p className="text-sm text-green-700 dark:text-green-300">
-                        {d.temp_min.toFixed(1)}°C - {d.temp_max.toFixed(1)}°C | Chuva: {d.precipitacao.toFixed(1)}mm
+                        {d.temp_min.toFixed(1)}°C - {d.temp_max.toFixed(1)}°C | Chuva: {d.precipitation.toFixed(1)}mm
                       </p>
                     </div>
                   ))}
-                  {melhorDia.anosIdeais === 0 && (
+                  {melhorDia.idealYears === 0 && (
                     <p className="text-sm text-muted-foreground italic text-center py-4">
                       Nenhum ano com clima ideal encontrado
                     </p>
@@ -632,18 +522,18 @@ export default function Results() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <AlertCircle className="h-5 w-5 text-red-500" />
-                  Anos com Clima Inadequado ({melhorDia.dataStr})
+                  Anos com Clima Inadequado ({melhorDia.dateStr})
                 </CardTitle>
                 <CardDescription>Exemplos de anos desfavoráveis no melhor dia</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {melhorDia.detalhes.filter((d: any) => !d.ideal).slice(0, 5).map((d: any) => (
-                    <div key={d.ano} className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                  {melhorDia.details.filter((d: any) => !d.ideal).slice(0, 5).map((d: any) => (
+                    <div key={d.year} className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-red-800 dark:text-red-200">{d.ano}</span>
+                        <span className="font-bold text-red-800 dark:text-red-200">{d.year}</span>
                       </div>
-                      <p className="text-xs text-red-700 dark:text-red-300">{d.motivos}</p>
+                      <p className="text-xs text-red-700 dark:text-red-300">{d.reasons}</p>
                     </div>
                   ))}
                 </div>

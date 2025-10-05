@@ -9,6 +9,7 @@ import { ArrowLeft, MapPin, Calendar, ArrowRight, Cloud, Satellite } from "lucid
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "~/lib/utils";
+import { EventProfileService } from "~/lib/services/event-profiles.service";
 import type { Route } from "./+types/analysis";
 import type { DateRange } from "react-day-picker";
 
@@ -19,49 +20,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-interface PerfilEvento {
-  nome: string;
-  emoji: string;
-  descricao: string;
-}
-
-const perfisEventos: Record<string, PerfilEvento> = {
-  praia: {
-    nome: 'Dia de Praia',
-    emoji: '🏖️',
-    descricao: 'Dia ensolarado, quente, sem chuva e vento moderado'
-  },
-  churrasco: {
-    nome: 'Churrasco ao Ar Livre',
-    emoji: '🍖',
-    descricao: 'Sem chuva, temperatura agradável'
-  },
-  casamento: {
-    nome: 'Casamento ao Ar Livre',
-    emoji: '💒',
-    descricao: 'Clima perfeito, sem chuva, vento leve'
-  },
-  trilha: {
-    nome: 'Trilha/Caminhada',
-    emoji: '🥾',
-    descricao: 'Temperatura amena, pode ter chuva leve'
-  },
-  corrida: {
-    nome: 'Corrida/Maratona',
-    emoji: '🏃',
-    descricao: 'Clima fresco, sem chuva'
-  },
-  cena_chuva: {
-    nome: 'Cena de Filme com Chuva',
-    emoji: '🎬',
-    descricao: 'Precisa de chuva para a cena!'
-  },
-  observacao_estrelas: {
-    nome: 'Observação de Estrelas',
-    emoji: '🌟',
-    descricao: 'Céu limpo, sem chuva, baixa umidade'
-  }
-};
+const eventProfiles = EventProfileService.getAllProfiles();
 
 export default function Analysis() {
   const [searchParams] = useSearchParams();
@@ -177,7 +136,7 @@ export default function Analysis() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {Object.entries(perfisEventos).map(([key, perfil]) => (
+              {Object.entries(eventProfiles).map(([key, profile]) => (
                 <button
                   key={key}
                   onClick={() => setPerfilSelecionado(key)}
@@ -187,12 +146,12 @@ export default function Analysis() {
                       : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
                   }`}
                 >
-                  <div className="text-3xl mb-2">{perfil.emoji}</div>
+                  <div className="text-3xl mb-2">{profile.emoji}</div>
                   <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">
-                    {perfil.nome}
+                    {profile.name}
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {perfil.descricao}
+                    {profile.description}
                   </div>
                 </button>
               ))}
