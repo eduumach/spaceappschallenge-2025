@@ -1,6 +1,7 @@
 // Página criada pelo Claude Sonnet 4.5
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { Header } from "~/components/header";
 import { MapPicker } from "~/components/map-picker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
@@ -131,14 +132,16 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-neutral-700 to-neutral-500 dark:from-neutral-300 dark:to-neutral-100 bg-clip-text text-transparent">
-            Seleção de Localização
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground px-4">Use todos os métodos para selecionar um ponto de interesse</p>
-        </div>
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      <Header />
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10">
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-neutral-700 to-neutral-500 dark:from-neutral-300 dark:to-neutral-100 bg-clip-text text-transparent">
+              Seleção de Localização
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground px-4">Use todos os métodos para selecionar um ponto de interesse</p>
+          </div>
 
         <div className="space-y-6">
           
@@ -244,8 +247,9 @@ export default function Home() {
           </Card>
         </div>
 
+        {/* Modal fixo na direita para localização selecionada */}
         {selectedLocation && (
-          <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] shadow-xl z-50 flex transition-all duration-300 ${
+          <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] shadow-xl z-40 flex transition-all duration-300 ${
             isModalExpanded ? 'w-80 bg-background border-l' : 'w-12 bg-transparent'
           }`}>
             <div className="flex flex-col justify-start pt-4">
@@ -310,6 +314,7 @@ export default function Home() {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
