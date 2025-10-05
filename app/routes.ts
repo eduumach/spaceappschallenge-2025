@@ -5,4 +5,5 @@ export default [
   index("routes/home.tsx"),
   route("analysis", "routes/analysis.tsx"),
   route("results", "routes/results.tsx"),
+  route("api/generate-event-profile", "routes/api.generate-event-profile.tsx"),
 ] satisfies RouteConfig;

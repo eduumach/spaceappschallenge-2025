@@ -47,6 +47,8 @@ export default function Analysis() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [perfilSelecionado, setPerfilSelecionado] = useState('praia');
   const [nomeEventoCustomizado, setNomeEventoCustomizado] = useState('');
+  const [loadingPerfil, setLoadingPerfil] = useState(false);
+  const [perfilGerado, setPerfilGerado] = useState<any>(null);
 
   // Carregar dados do localStorage ao montar o componente
   useEffect(() => {
@@ -118,7 +120,7 @@ export default function Analysis() {
     );
   }
 
-  const handleContinueToResults = () => {
+  const handleContinueToResults = async () => {
     if (!dateRange?.from || !dateRange?.to) {
       alert(t('alerts.selectDateRange'));
       return;
@@ -129,24 +131,67 @@ export default function Analysis() {
       return;
     }
 
-    const params = new URLSearchParams({
-      lat: latitude.toString(),
-      lng: longitude.toString(),
-      dataInicio: dateRange.from.toISOString(),
-      dataFim: dateRange.to.toISOString(),
-      perfil: perfilSelecionado,
-      mode: searchMode,
-    });
-
-    if (locationName) {
-      params.append('name', locationName);
-    }
-
+    // Se for customizado, gerar o perfil primeiro
     if (perfilSelecionado === 'customizavel' && nomeEventoCustomizado.trim()) {
-      params.append('customEventName', nomeEventoCustomizado.trim());
-    }
+      setLoadingPerfil(true);
+      try {
+        const response = await fetch('/api/generate-event-profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            eventDescription: nomeEventoCustomizado.trim()
+          })
+        });
 
-    navigate(`/results?${params.toString()}`);
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          // Codificar os dados do perfil gerado em base64 para passar na URL
+          const encodedProfile = btoa(JSON.stringify(result.data));
+          
+          const params = new URLSearchParams({
+            lat: latitude.toString(),
+            lng: longitude.toString(),
+            dataInicio: dateRange.from.toISOString(),
+            dataFim: dateRange.to.toISOString(),
+            perfil: perfilSelecionado,
+            mode: searchMode,
+            generatedProfile: encodedProfile
+          });
+
+          if (locationName) {
+            params.append('name', locationName);
+          }
+
+          navigate(`/results?${params.toString()}`);
+        } else {
+          alert('Erro ao gerar perfil do evento. Tente novamente.');
+        }
+      } catch (error) {
+        console.error('Error generating profile:', error);
+        alert('Erro ao conectar com o servidor. Tente novamente.');
+      } finally {
+        setLoadingPerfil(false);
+      }
+    } else {
+      // Perfil pré-definido, navegar direto
+      const params = new URLSearchParams({
+        lat: latitude.toString(),
+        lng: longitude.toString(),
+        dataInicio: dateRange.from.toISOString(),
+        dataFim: dateRange.to.toISOString(),
+        perfil: perfilSelecionado,
+        mode: searchMode,
+      });
+
+      if (locationName) {
+        params.append('name', locationName);
+      }
+
+      navigate(`/results?${params.toString()}`);
+    }
   };
 
   return (

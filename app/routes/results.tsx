@@ -46,7 +46,21 @@ export default function Results() {
   const [erro, setErro] = useState(false);
   const [sugestoesAlternativas, setSugestoesAlternativas] = useState<DayAnalysis[]>([]);
 
-  const perfil = EventProfileService.getProfile(perfilKey);
+  // Get generated profile from URL (base64 encoded)
+  const encodedProfile = searchParams.get('generatedProfile') || '';
+  
+  // Decode and use the generated profile if available
+  let perfil = EventProfileService.getProfile(perfilKey);
+  
+  if (encodedProfile) {
+    try {
+      const decodedProfile = JSON.parse(atob(encodedProfile));
+      perfil = decodedProfile;
+    } catch (error) {
+      console.error('Error decoding profile:', error);
+      // Fallback to default profile
+    }
+  }
 
   if (!perfil) {
     return (
