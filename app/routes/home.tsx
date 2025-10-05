@@ -286,7 +286,7 @@ export default function Home() {
           </Card>
 
           <Card className="overflow-hidden border-2 shadow-lg p-0 gap-0">
-            <CardHeader className="border-b p-3">
+            <CardHeader className="p-3">
               <CardTitle className="flex items-center gap-2 text-base">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 {t('map.title')}
