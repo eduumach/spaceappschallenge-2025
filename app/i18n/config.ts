@@ -1,18 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Importar as traduções
-import enCommon from './locales/en-US/common.json';
-import ptCommon from './locales/pt-BR/common.json';
-import enHome from './locales/en-US/home.json';
-import ptHome from './locales/pt-BR/home.json';
-import enAnalysis from './locales/en-US/analysis.json';
-import ptAnalysis from './locales/pt-BR/analysis.json';
-import enEventProfiles from './locales/en-US/eventProfiles.json';
-import ptEventProfiles from './locales/pt-BR/eventProfiles.json';
-import enResults from './locales/en-US/results.json';
-import ptResults from './locales/pt-BR/results.json';
-
 // Detectar idioma do navegador ou usar o padrão
 const browserLanguage = typeof window !== 'undefined'
   ? navigator.language
@@ -33,18 +21,18 @@ i18n
   .init({
     resources: {
       'en-US': {
-        common: enCommon,
-        home: enHome,
-        analysis: enAnalysis,
-        eventProfiles: enEventProfiles,
-        results: enResults,
+        common: await import('./locales/en-US/common.json').then(m => m.default),
+        home: await import('./locales/en-US/home.json').then(m => m.default),
+        analysis: await import('./locales/en-US/analysis.json').then(m => m.default),
+        eventProfiles: await import('./locales/en-US/eventProfiles.json').then(m => m.default),
+        results: await import('./locales/en-US/results.json').then(m => m.default),
       },
       'pt-BR': {
-        common: ptCommon,
-        home: ptHome,
-        analysis: ptAnalysis,
-        eventProfiles: ptEventProfiles,
-        results: ptResults,
+        common: await import('./locales/pt-BR/common.json').then(m => m.default),
+        home: await import('./locales/pt-BR/home.json').then(m => m.default),
+        analysis: await import('./locales/pt-BR/analysis.json').then(m => m.default),
+        eventProfiles: await import('./locales/pt-BR/eventProfiles.json').then(m => m.default),
+        results: await import('./locales/pt-BR/results.json').then(m => m.default),
       },
     },
     lng: defaultLanguage,

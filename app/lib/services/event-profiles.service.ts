@@ -87,7 +87,6 @@ const eventPresets: Record<string, EventCriteria> = {
 export const EVENT_PROFILES: Record<string, EventProfile> = {};
 for (const key of Object.keys(eventPresets)) {
   const criteria = eventPresets[key]
-  console.log(criteria)
   EVENT_PROFILES[key] = {
     name: "", // vai ser definido no front mesmo
     description: "",

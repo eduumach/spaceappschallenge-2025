@@ -288,7 +288,6 @@ export default function Analysis() {
         setLoadingPerfil(false);
       }
     }
-    console.log(params)
     navigate(`/results?${params.toString()}`);
   };
 
