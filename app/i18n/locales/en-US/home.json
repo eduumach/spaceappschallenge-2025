@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "title": "Space Apps Challenge 2025 - Location Selection",
+    "description": "Select a location on the interactive map for the Space Apps Challenge 2025"
+  },
+  "title": "Location Selection",
+  "subtitle": "Use all methods to select a point of interest",
+  "searchByName": {
+    "title": "Search by Name",
+    "description": "Enter the name of a city or address",
+    "placeholder": "Enter an address or location...",
+    "button": "Search",
+    "searching": "Searching...",
+    "active": "Active",
+    "notFound": "Location not found. Try with a more specific name.",
+    "error": "Error searching for location. Please try again."
+  },
+  "coordinates": {
+    "title": "Coordinates",
+    "description": "Enter latitude and longitude directly",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "latitudePlaceholder": "-23.5505",
+    "longitudePlaceholder": "-46.6333",
+    "latitudeRange": "Between -90 and 90",
+    "longitudeRange": "Between -180 and 180",
+    "button": "Set",
+    "active": "Active",
+    "invalidCoordinates": "Please enter valid coordinates",
+    "invalidLatitude": "Latitude must be between -90 and 90",
+    "invalidLongitude": "Longitude must be between -180 and 180"
+  },
+  "map": {
+    "title": "Interactive Map",
+    "description": "Click on the map to select",
+    "active": "Active"
+  },
+  "selectedLocation": {
+    "title": "Selected Location",
+    "success": "Location successfully set",
+    "methodMap": "Map",
+    "methodName": "Name",
+    "methodCoordinates": "Coordinates",
+    "continueButton": "Go to Data",
+    "clearButton": "Clear Selection"
+  }
+}
