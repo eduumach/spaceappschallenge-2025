@@ -31,6 +31,30 @@
     "selectDateRange": "Please select a date range for analysis",
     "enterCustomEventName": "Please enter the name of your custom event"
   },
+  "timeSelection": {
+    "title": "Analysis Time",
+    "description": "Choose whether to analyze a specific hour of the day or the full day",
+    "useHourlyData": "Use data from a specific hour",
+    "selectHour": "Select the hour",
+    "hourlyDataHint": "Hourly data provides more specific information for a time of day. For example, 14:00 for an afternoon event.",
+    "dailyDataMessage": "Using daily data (full day average)"
+  },
+  "criteria": {
+    "title": "Event Criteria",
+    "hint": "Check which criteria should be filtered and customize the values.",
+    "temp_min_ideal": "Min ideal temp",
+    "temp_max_ideal": "Max ideal temp",
+    "precipitation_max": "Max precipitation",
+    "wind_max": "Max wind",
+    "humidity_min": "Min humidity",
+    "humidity_max": "Max humidity"
+  },
+  "profiles": {
+    "customizavel_manual": {
+      "name": "Manual Customizable",
+      "description": "Manually define the event criteria."
+    }
+  },
   "button": {
     "viewProbabilities": "View Probabilities"
   }

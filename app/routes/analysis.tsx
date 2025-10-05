@@ -22,21 +22,6 @@ const STORAGE_KEY = 'spaceapps_analysis_data';
 const CUSTOMIZAVEL_KEY = 'customizavel';
 const CUSTOMIZAVEL_MANUAL_KEY = 'customizavel_manual';
 
-const eventProfiles = {
-  ...EventProfileService.getAllProfiles(),
-  [CUSTOMIZAVEL_MANUAL_KEY]: {
-    name: 'Customizável Manual',
-    description: 'Defina manualmente os critérios do evento.',
-    criteria: {
-      temp_min_ideal: '',
-      temp_max_ideal: '',
-      precipitation_max: '',
-      wind_max: '',
-      humidity_min: '',
-      humidity_max: '',
-    },
-  },
-};
 
 export function meta({ }: Route.MetaArgs) {
   const { t } = useTranslation('analysis');
@@ -48,10 +33,42 @@ export function meta({ }: Route.MetaArgs) {
 
 export default function Analysis() {
   const { t, i18n } = useTranslation('analysis');
+  const { t: tProfiles } = useTranslation('eventProfiles');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
   const currentLocale = i18n.language === 'en-US' ? enUS : ptBR;
+
+  // Get event profiles with translations
+  const eventProfiles = useMemo(() => {
+    const baseProfiles = EventProfileService.getAllProfiles();
+    const translatedProfiles: Record<string, { name: string; description: string; criteria: any }> = {};
+    
+    // Translate base profiles
+    Object.keys(baseProfiles).forEach(key => {
+      translatedProfiles[key] = {
+        name: tProfiles(`${key}.name`),
+        description: tProfiles(`${key}.description`),
+        criteria: baseProfiles[key].criteria,
+      };
+    });
+    
+    // Add manual customizable profile
+    translatedProfiles[CUSTOMIZAVEL_MANUAL_KEY] = {
+      name: t('profiles.customizavel_manual.name'),
+      description: t('profiles.customizavel_manual.description'),
+      criteria: {
+        temp_min_ideal: '',
+        temp_max_ideal: '',
+        precipitation_max: '',
+        wind_max: '',
+        humidity_min: '',
+        humidity_max: '',
+      },
+    };
+    
+    return translatedProfiles;
+  }, [t, tProfiles]);
 
   // Pegar dados da URL ou do localStorage
   const urlLatitude = parseFloat(searchParams.get('lat') || '0');
@@ -355,10 +372,10 @@ export default function Analysis() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 <Clock className="h-5 w-5 text-primary" />
-                Horário da Análise
+                {t('timeSelection.title')}
               </CardTitle>
               <CardDescription>
-                Escolha se deseja analisar uma hora específica do dia ou o dia completo
+                {t('timeSelection.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -372,21 +389,21 @@ export default function Analysis() {
                   htmlFor="hourly-data"
                   className="text-base font-medium cursor-pointer"
                 >
-                  Usar dados de uma hora específica
+                  {t('timeSelection.useHourlyData')}
                 </Label>
               </div>
 
               {useHourlyData && (
                 <div className="space-y-2">
                   <Label htmlFor="hour-select" className="text-base">
-                    Selecione a hora
+                    {t('timeSelection.selectHour')}
                   </Label>
                   <Select
                     value={selectedHour.toString()}
                     onValueChange={(value) => setSelectedHour(parseInt(value))}
                   >
                     <SelectTrigger id="hour-select" className="h-12">
-                      <SelectValue placeholder="Selecione a hora" />
+                      <SelectValue placeholder={t('timeSelection.selectHour')} />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 24 }, (_, i) => (
@@ -397,15 +414,14 @@ export default function Analysis() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Dados horários fornecem informações mais específicas para um momento do dia.
-                    Por exemplo, 14:00 para um evento à tarde.
+                    {t('timeSelection.hourlyDataHint')}
                   </p>
                 </div>
               )}
 
               {!useHourlyData && (
                 <p className="text-sm text-muted-foreground">
-                  Usando dados diários (média do dia completo)
+                  {t('timeSelection.dailyDataMessage')}
                 </p>
               )}
             </CardContent>
@@ -466,7 +482,7 @@ export default function Analysis() {
               {customCriteria && CRITERIA_KEYS.length > 0 && (
                 <div className="mt-6">
                   <Label className="text-base mb-2 block">
-                    Critérios do evento
+                    {t('criteria.title')}
                   </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {CRITERIA_KEYS.map((key) => (
@@ -481,7 +497,7 @@ export default function Analysis() {
                             disabled={perfilSelecionado !== CUSTOMIZAVEL_MANUAL_KEY}
                           />
                           <Label htmlFor={`criteria-${key}`} className="capitalize cursor-pointer">
-                            {key.replace(/_/g, ' ')}
+                            {t(`criteria.${key}`)}
                           </Label>
                         </div>
                         <Input
@@ -498,7 +514,7 @@ export default function Analysis() {
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Marque quais critérios devem ser filtrados e personalize os valores.
+                    {t('criteria.hint')}
                   </p>
                 </div>
               )}

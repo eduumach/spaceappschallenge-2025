@@ -31,6 +31,30 @@
     "selectDateRange": "Por favor, selecione um período de datas para análise",
     "enterCustomEventName": "Por favor, digite o nome do seu evento personalizado"
   },
+  "timeSelection": {
+    "title": "Horário da Análise",
+    "description": "Escolha se deseja analisar uma hora específica do dia ou o dia completo",
+    "useHourlyData": "Usar dados de uma hora específica",
+    "selectHour": "Selecione a hora",
+    "hourlyDataHint": "Dados horários fornecem informações mais específicas para um momento do dia. Por exemplo, 14:00 para um evento à tarde.",
+    "dailyDataMessage": "Usando dados diários (média do dia completo)"
+  },
+  "criteria": {
+    "title": "Critérios do evento",
+    "hint": "Marque quais critérios devem ser filtrados e personalize os valores.",
+    "temp_min_ideal": "Temp mín ideal",
+    "temp_max_ideal": "Temp máx ideal",
+    "precipitation_max": "Precipitação máx",
+    "wind_max": "Vento máx",
+    "humidity_min": "Umidade mín",
+    "humidity_max": "Umidade máx"
+  },
+  "profiles": {
+    "customizavel_manual": {
+      "name": "Customizável Manual",
+      "description": "Defina manualmente os critérios do evento."
+    }
+  },
   "button": {
     "viewProbabilities": "Ver Probabilidades"
   }
