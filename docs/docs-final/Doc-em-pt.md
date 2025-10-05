@@ -117,30 +117,13 @@ Cada ano é avaliado com base em **todos** os critérios definidos:
 
 Compara a probabilidade da data escolhida com datas próximas (±15 dias):
 - **Borda Azul**: Data selecionada pelo usuário
-- **Borda Dourada**: Melhor alternativa identificada ★
+- **Borda Dourada**: Melhor alternativa identificada
 
 **Benefício**: Sugere datas melhores caso a escolhida não seja ideal.
 
 ---
 
-### 6. Análise de Tendências Climáticas
-
-![Análise de Tendências](./assets/07_trend_analysis.png)
-
-Compara duas décadas de dados:
-- **2005-2014**: Dados históricos
-- **2015-2024**: Dados recentes
-
-**Tendências Identificadas**:
-- **POSITIVA**: Condições melhorando (+10% ou mais)
-- **ESTÁVEL**: Sem mudanças significativas (±10%)
-- **NEGATIVA**: Condições piorando (-10% ou mais)
-
-**Insights**: Identifica mudanças climáticas locais e ajusta expectativas.
-
----
-
-### 7. Infográfico Resumo
+### 6. Infográfico Resumo
 
 ![Infográfico de Resumo](./assets/10_summary_infographic.png)
 
