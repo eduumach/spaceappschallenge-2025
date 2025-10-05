@@ -19,7 +19,7 @@ export function LanguageSelector() {
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder={t('changeLanguage')} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-[1001]">
         {languages.map((lang) => (
           <SelectItem key={lang.code} value={lang.code}>
             {lang.name}
