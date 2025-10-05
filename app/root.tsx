@@ -68,6 +68,7 @@ export default function App() {
         <img src={queijo} alt="Loading..." className="h-24 w-24 animate-spin" />
       </div>
     )
+    
   }
 
   return (
