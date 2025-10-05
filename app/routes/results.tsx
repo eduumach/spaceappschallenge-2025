@@ -49,6 +49,8 @@ export default function Results() {
   const dataFim = searchParams.get('dataFim') || '';
   const perfilKey = searchParams.get('perfil') || 'praia';
   const locationName = searchParams.get('name') || '';
+  const hourParam = searchParams.get('hour');
+  const hour = hourParam ? parseInt(hourParam) : undefined;
 
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -116,6 +118,7 @@ export default function Results() {
         startDate,
         endDate,
         expansionDays: 30,
+        hour, // Pass the hour parameter for hourly data
         onProgress: (completed, total) => {
           // Update progress from 5% to 60% based on completed requests
           const progressPercent = 5 + Math.floor((completed / total) * 55);

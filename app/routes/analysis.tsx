@@ -7,7 +7,9 @@ import { Input } from "~/components/ui/input";
 import { Calendar as CalendarComponent } from "~/components/ui/calendar";
 import { Header } from "~/components/header";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { ArrowLeft, Calendar, ArrowRight, MousePointer2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Checkbox } from "~/components/ui/checkbox";
+import { ArrowLeft, Calendar, ArrowRight, MousePointer2, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { cn } from "~/lib/utils";
@@ -69,6 +71,8 @@ export default function Analysis() {
   const [customCriteria, setCustomCriteria] = useState<any>({});
   const [criteriaEnabled, setCriteriaEnabled] = useState<any>({});
   const [criteriaQueryParams, setCriteriaQueryParams] = useState<Record<string, string>>({});
+  const [useHourlyData, setUseHourlyData] = useState(false);
+  const [selectedHour, setSelectedHour] = useState(12); // Default to noon
 
   // Carregar dados do localStorage ao montar o componente
   useEffect(() => {
@@ -103,6 +107,12 @@ export default function Analysis() {
         if (parsed.nomeEventoCustomizado) {
           setNomeEventoCustomizado(parsed.nomeEventoCustomizado);
         }
+        if (parsed.useHourlyData !== undefined) {
+          setUseHourlyData(parsed.useHourlyData);
+        }
+        if (parsed.selectedHour !== undefined) {
+          setSelectedHour(parsed.selectedHour);
+        }
       } catch (error) {
         console.error('Erro ao carregar dados de análise salvos:', error);
       }
@@ -119,9 +129,11 @@ export default function Analysis() {
       dateRange,
       perfilSelecionado,
       nomeEventoCustomizado,
+      useHourlyData,
+      selectedHour,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-  }, [latitude, longitude, locationName, searchMode, dateRange, perfilSelecionado, nomeEventoCustomizado]);
+  }, [latitude, longitude, locationName, searchMode, dateRange, perfilSelecionado, nomeEventoCustomizado, useHourlyData, selectedHour]);
 
 
   useEffect(() => {
@@ -137,20 +149,22 @@ export default function Analysis() {
         }
         return prev;
       });
-    } else if (perfilSelecionado && eventProfiles[perfilSelecionado]?.criteria) {
+    } else if (perfilSelecionado && (eventProfiles as any)[perfilSelecionado]?.criteria) {
       // Atualiza customCriteria para os critérios do preset
       setCustomCriteria((prev: any) => {
         const newCriteria: any = {};
+        const profile = (eventProfiles as any)[perfilSelecionado];
         CRITERIA_KEYS.forEach(key => {
-          newCriteria[key] = eventProfiles[perfilSelecionado].criteria[key] ?? '';
+          newCriteria[key] = profile.criteria[key] ?? '';
         });
         return newCriteria;
       });
       // Marca apenas os critérios definidos no preset
       setCriteriaEnabled((prev: any) => {
         const enabled: any = {};
+        const profile = (eventProfiles as any)[perfilSelecionado];
         CRITERIA_KEYS.forEach(key => {
-          enabled[key] = key in eventProfiles[perfilSelecionado].criteria;
+          enabled[key] = key in profile.criteria;
         });
         return enabled;
       });
@@ -219,6 +233,9 @@ export default function Analysis() {
     });
     if (locationName) {
       params.append('name', locationName);
+    }
+    if (useHourlyData) {
+      params.append('hour', selectedHour.toString());
     }
     Object.keys(criteriaQueryParams).forEach(key => {
       params.append(key, criteriaQueryParams[key]);
@@ -330,6 +347,67 @@ export default function Analysis() {
                   </PopoverContent>
                 </Popover>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Time Selection Card */}
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Clock className="h-5 w-5 text-primary" />
+                Horário da Análise
+              </CardTitle>
+              <CardDescription>
+                Escolha se deseja analisar uma hora específica do dia ou o dia completo
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="hourly-data"
+                  checked={useHourlyData}
+                  onCheckedChange={(checked) => setUseHourlyData(checked === true)}
+                />
+                <Label
+                  htmlFor="hourly-data"
+                  className="text-base font-medium cursor-pointer"
+                >
+                  Usar dados de uma hora específica
+                </Label>
+              </div>
+
+              {useHourlyData && (
+                <div className="space-y-2">
+                  <Label htmlFor="hour-select" className="text-base">
+                    Selecione a hora
+                  </Label>
+                  <Select
+                    value={selectedHour.toString()}
+                    onValueChange={(value) => setSelectedHour(parseInt(value))}
+                  >
+                    <SelectTrigger id="hour-select" className="h-12">
+                      <SelectValue placeholder="Selecione a hora" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <SelectItem key={i} value={i.toString()}>
+                          {i.toString().padStart(2, '0')}:00
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Dados horários fornecem informações mais específicas para um momento do dia.
+                    Por exemplo, 14:00 para um evento à tarde.
+                  </p>
+                </div>
+              )}
+
+              {!useHourlyData && (
+                <p className="text-sm text-muted-foreground">
+                  Usando dados diários (média do dia completo)
+                </p>
+              )}
             </CardContent>
           </Card>
 
