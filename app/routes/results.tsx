@@ -32,6 +32,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Results() {
   const { t, i18n } = useTranslation('results');
+  const { t : tProfiles } = useTranslation('eventProfiles');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -69,6 +70,8 @@ export default function Results() {
       } 
     }
   })
+  perfil.name = tProfiles(perfilKey + ".name");
+  perfil.description = tProfiles(perfilKey + ".description");
 
   // console.log(perfil)
   if (!perfil) {
