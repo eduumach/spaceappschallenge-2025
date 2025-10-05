@@ -248,5 +248,3 @@ Este sistema resolve o desafio proposto pela NASA ao criar uma ponte acessível 
 **Desafio**: Vai chover na minha parada?  
 **Equipe**: Code and Cheese  
 **Tecnologias**: NASA POWER API, React, TypeScript, Python, Machine Learning
-
-*"O 'mau tempo' de uma pessoa pode ser o clima desejável para outra — e agora você pode saber as probabilidades!"*
